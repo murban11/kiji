@@ -195,6 +195,30 @@ public class TokenizerTest {
     }
 
     @Test
+    void TestScanTokensIfSingleUpperCaseLetterThenResultingTokenHasCorrectType() {
+        String lexeme = "I";
+        Tokenizer tokenizer = new Tokenizer(lexeme);
+        List<Token> result = tokenizer.scanTokens();
+        assertEquals(Token.Type.CAPITALIZED_WORD, result.getFirst().getType());
+    }
+
+    @Test
+    void TestScanTokensIfSingleUpperCaseLetterFollowedByDotThenResultingTokenHasCorrectType() {
+        String lexeme = "I.";
+        Tokenizer tokenizer = new Tokenizer(lexeme);
+        List<Token> result = tokenizer.scanTokens();
+        assertEquals(Token.Type.CAPITALIZED_WORD, result.getFirst().getType());
+    }
+
+    @Test
+    void TestScanTokensIfSingleUpperCaseLetterPrecededByDotThenResultingTokenHasCorrectType() {
+        String lexeme = ".I";
+        Tokenizer tokenizer = new Tokenizer(lexeme);
+        List<Token> result = tokenizer.scanTokens();
+        assertEquals(Token.Type.CAPITALIZED_WORD, result.getFirst().getType());
+    }
+
+    @Test
     void TestScanTokensIfUnsupportedCharactersThenIgnoresThem() {
         String text = "int main() { printf(\"Hello world!\\n\"); }";
         Tokenizer tokenizer = new Tokenizer(text);

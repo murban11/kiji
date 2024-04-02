@@ -54,6 +54,14 @@ public class Tokenizer {
                 }
             }
 
+            if (type == Token.Type.ACRONIM
+                && ((current - start) == 1
+                || ((current - start) == 2
+                && this.source.charAt(current - 1) == '.'))
+            ) {
+                type = Token.Type.CAPITALIZED_WORD;
+            }
+
             addToken(type);
     }
 
