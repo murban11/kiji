@@ -81,11 +81,10 @@ public class DatasetHandler extends DefaultHandler {
                 break;
             case D:
                 if (inPlaces) {
-                    String labelStr = elementValue.toString();
+                    String labelStr = elementValue
+                        .toString().toUpperCase().replaceAll("-", "_");
                     if (Article.isValidLabel(labelStr)) {
-                        labels.add(
-                            Article.LABEL.valueOf(labelStr.toUpperCase())
-                        );
+                        labels.add(Article.LABEL.valueOf(labelStr));
                     } else {
                         containsUnsupportedLabels = true;
                     }
