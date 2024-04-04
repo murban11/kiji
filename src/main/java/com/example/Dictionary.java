@@ -46,120 +46,120 @@ public class Dictionary {
         }
     }
 
-    public boolean isWestGermanyPolitician(List<Token> tokens, int pos) {
+    public int isWestGermanyPolitician(List<Token> tokens, int pos) {
         List<List<Token>> names = this.data.get("P").get("west_germany");
 
         return isValidEntry(names, tokens, pos);
     }
 
-    public boolean isCanadianCity(List<Token> tokens, int pos) {
+    public int isCanadianCity(List<Token> tokens, int pos) {
         List<List<Token>> cities = this.data.get("W").get("canada");
 
         return isValidEntry(cities, tokens, pos);
     }
 
-    public boolean isFrenchBank(List<Token> tokens, int pos) {
+    public int isFrenchBank(List<Token> tokens, int pos) {
         List<List<Token>> banks = this.data.get("O").get("france");
 
         return isValidEntry(banks, tokens, pos);
     }
 
-    public boolean isJapaneseCompany(List<Token> tokens, int pos) {
+    public int isJapaneseCompany(List<Token> tokens, int pos) {
         List<List<Token>> companies = this.data.get("C").get("japan");
 
         return isValidEntry(companies, tokens, pos);
     }
 
-    public boolean isStateInUSA(List<Token> tokens, int pos) {
+    public int isStateInUSA(List<Token> tokens, int pos) {
         List<List<Token>> states = this.data.get("H").get("usa");
 
         return isValidEntry(states, tokens, pos);
     }
 
-    public boolean isCapitalOfWestGerman(List<Token> tokens, int pos) {
+    public int isCapitalOfWestGerman(List<Token> tokens, int pos) {
         List<List<Token>> capital = this.data.get("s").get("west_germany");
 
         return isValidEntry(capital, tokens, pos);
     }
 
-    public boolean isCapitalOfUSA(List<Token> tokens, int pos) {
+    public int isCapitalOfUSA(List<Token> tokens, int pos) {
         List<List<Token>> capital = this.data.get("s").get("usa");
 
         return isValidEntry(capital, tokens, pos);
     }
 
-    public boolean isCapitalOfFrance(List<Token> tokens, int pos) {
+    public int isCapitalOfFrance(List<Token> tokens, int pos) {
         List<List<Token>> capital = this.data.get("s").get("france");
 
         return isValidEntry(capital, tokens, pos);
     }
 
-    public boolean isCapitalOfUK(List<Token> tokens, int pos) {
+    public int isCapitalOfUK(List<Token> tokens, int pos) {
         List<List<Token>> capital = this.data.get("s").get("uk");
 
         return isValidEntry(capital, tokens, pos);
     }
 
-    public boolean isCapitalOfCanada(List<Token> tokens, int pos) {
+    public int isCapitalOfCanada(List<Token> tokens, int pos) {
         List<List<Token>> capital = this.data.get("s").get("canada");
 
         return isValidEntry(capital, tokens, pos);
     }
 
-    public boolean isCapitalOfJapan(List<Token> tokens, int pos) {
+    public int isCapitalOfJapan(List<Token> tokens, int pos) {
         List<List<Token>> capital = this.data.get("s").get("japan");
 
         return isValidEntry(capital, tokens, pos);
     }
 
-    public boolean isWestGermanCurrency(List<Token> tokens, int pos) {
+    public int isWestGermanCurrency(List<Token> tokens, int pos) {
         List<List<Token>> currency = this.data.get("m").get("west_germany");
 
         return isValidEntry(currency, tokens, pos);
     }
 
-    public boolean isUSACurrency(List<Token> tokens, int pos) {
+    public int isUSACurrency(List<Token> tokens, int pos) {
         List<List<Token>> usa_currency = this.data.get("m").get("usa");
         List<List<Token>> canadian_currency = this.data.get("m").get("canada");
 
-        if (isValidEntry(canadian_currency, tokens, pos - 1)) {
-            return false;
+        if (isValidEntry(canadian_currency, tokens, pos - 1) > 0) {
+            return 0;
         }
 
         return isValidEntry(usa_currency, tokens, pos);
     }
 
-    public boolean isFrenchCurrency(List<Token> tokens, int pos) {
+    public int isFrenchCurrency(List<Token> tokens, int pos) {
         List<List<Token>> currency = this.data.get("m").get("france");
 
         return isValidEntry(currency, tokens, pos);
     }
 
-    public boolean isUKCurrency(List<Token> tokens, int pos) {
+    public int isUKCurrency(List<Token> tokens, int pos) {
         List<List<Token>> currency = this.data.get("m").get("uk");
 
         return isValidEntry(currency, tokens, pos);
     }
 
-    public boolean isCanadianCurrency(List<Token> tokens, int pos) {
+    public int isCanadianCurrency(List<Token> tokens, int pos) {
         List<List<Token>> currency = this.data.get("m").get("canada");
 
         return isValidEntry(currency, tokens, pos);
     }
 
-    public boolean isJapaneseCurrencty(List<Token> tokens, int pos) {
+    public int isJapaneseCurrencty(List<Token> tokens, int pos) {
         List<List<Token>> currency = this.data.get("m").get("japan");
 
         return isValidEntry(currency, tokens, pos);
     }
 
-    private boolean isValidEntry(
+    private int isValidEntry(
         List<List<Token>> entries,
         List<Token> input,
         int pos
     ) {
         if (pos < 0) {
-            return false;
+            return 0;
         }
 
         for (List<Token> entry : entries) {
@@ -179,10 +179,10 @@ public class Dictionary {
             }
 
             if (!foundMismatch) {
-                return true;
+                return entry.size();
             }
         }
 
-        return false;
+        return 0;
     }
 }

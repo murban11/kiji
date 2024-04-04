@@ -102,73 +102,82 @@ public class DictionaryTest {
     }
 
     @Test
-    void TestIsWestGermanyPoliticianIfEmptyListOfTokensThenReturnsFalse() {
-        assertFalse(dict.isWestGermanyPolitician(new ArrayList<Token>(), 0));
+    void TestIsWestGermanyPoliticianIfEmptyListOfTokensThenReturnsZero() {
+        assertEquals(0, dict.isWestGermanyPolitician(new ArrayList<Token>(), 0));
     }
 
     @Test
-    void TestIsWestGermanyPoliticianIfSingleTokenThenReturnsFalse() {
-        assertFalse(dict.isWestGermanyPolitician(
+    void TestIsWestGermanyPoliticianIfSingleTokenThenReturnsZero() {
+        assertEquals(0, dict.isWestGermanyPolitician(
             Arrays.asList(new Token(Token.Type.CAPITALIZED_WORD, "Richard")),
             0
         ));
     }
 
     @Test
-    void TestIsWestGermanyPoliticianIfValidFullNameProvidedThenReturnsTrue() {
+    void TestIsWestGermanyPoliticianIfValidFullNameProvidedThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Richard Weizsaecker");
 
-        assertTrue(dict.isWestGermanyPolitician(
+        assertNotEquals(0, dict.isWestGermanyPolitician(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsWestGermanPoliticianIfOnlyLastNameIsValidThenReturnsFalse() {
+    void TestIsWestGermanPoliticianIfOnlyLastNameIsValidThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Eljot Weizsaecker");
 
-        assertFalse(dict.isWestGermanyPolitician(
+        assertEquals(0, dict.isWestGermanyPolitician(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsWestGermanPoliticianIfNonZeroPositionButContainingCorrectNameThenReturnsTrue() {
+    void TestIsWestGermanPoliticianIfNonZeroPositionButContainingCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("foo bar Richard Weizsaecker baz");
 
-        assertTrue(dict.isWestGermanyPolitician(
+        assertNotEquals(0, dict.isWestGermanyPolitician(
             stemmer.stemTokens(tokenizer.scanTokens()), 2
         ));
     }
 
     @Test
-    void TestIsWestGermanPoliticianIfInvalidPositionThenReturnsFalse() {
+    void TestIsWestGermanPoliticianIfInvalidPositionThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Helmut Kohl");
 
-        assertFalse(dict.isWestGermanyPolitician(
+        assertEquals(0, dict.isWestGermanyPolitician(
             stemmer.stemTokens(tokenizer.scanTokens()), 4
         ));
     }
 
     @Test
-    void TestIsWestGermanPoliticianIfValidNameAtLastPositionThenReturnsTrue() {
+    void TestIsWestGermanPoliticianIfValidNameAtLastPositionThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("foo bar baz Helmut Kohl");
 
-        assertTrue(dict.isWestGermanyPolitician(
+        assertNotEquals(0, dict.isWestGermanyPolitician(
             stemmer.stemTokens(tokenizer.scanTokens()), 3
         ));
     }
 
     @Test
-    void TestIsCanadianCityIfEmptyListOfTokensThenReturnsFalse() {
-        assertFalse(dict.isCanadianCity(new ArrayList<Token>(), 0));
+    void TestIsWestGermanPoliticianIfValidNameThenRetunsNumberOfWordsInAName() {
+        Tokenizer tokenizer = new Tokenizer("Helmut Kohl");
+
+        assertEquals(2, dict.isWestGermanyPolitician(
+            stemmer.stemTokens(tokenizer.scanTokens()), 0
+        ));
     }
 
     @Test
-    void TestIsCanadianCityIfValidSingleTokenNameThenReturnsTrue() {
+    void TestIsCanadianCityIfEmptyListOfTokensThenReturnsZero() {
+        assertEquals(0, dict.isCanadianCity(new ArrayList<Token>(), 0));
+    }
+
+    @Test
+    void TestIsCanadianCityIfValidSingleTokenNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Toronto");
 
-        assertTrue(dict.isCanadianCity(
+        assertNotEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
@@ -177,390 +186,399 @@ public class DictionaryTest {
     void TestIsCanadianCityIfMultiWordCityNameThenHandlesItCorrectly() {
         Tokenizer tokenizer = new Tokenizer("Quebec City");
 
-        assertTrue(dict.isCanadianCity(
+        assertNotEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCanadianCityIfLastPartOfMultiWordNameIsInvalidThenReturnsFalse() {
+    void TestIsCanadianCityIfLastPartOfMultiWordNameIsInvalidThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Quebec Foo");
 
-        assertFalse(dict.isCanadianCity(
+        assertEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCanadianCityIfFirstPartOfMultiWordNameIsInvalidThenReturnsFalse() {
+    void TestIsCanadianCityIfFirstPartOfMultiWordNameIsInvalidThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Neo City");
 
-        assertFalse(dict.isCanadianCity(
+        assertEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCanadianCityIfNonZeroPositionButContainingCorrectCityNameThenReturnsTrue() {
+    void TestIsCanadianCityIfNonZeroPositionButContainingCorrectCityNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("spam eggs foo Toronto bar baz");
 
-        assertTrue(dict.isCanadianCity(
+        assertNotEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 3
         ));
     }
 
     @Test
-    void TestIsCanadianCityIfNonZeroPositionWithMultiWordCityNameThenReturnsTrue() {
+    void TestIsCanadianCityIfNonZeroPositionWithMultiWordCityNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("foo Quebec City bar");
 
-        assertTrue(dict.isCanadianCity(
+        assertNotEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 1
         ));
     }
 
     @Test
-    void TestIsCanadianCityIfValidButContainsSpecialCharactersThenReturnsTrue() {
+    void TestIsCanadianCityIfValidButContainsSpecialCharactersThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("St. John's");
 
-        assertTrue(dict.isCanadianCity(
+        assertNotEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCAnadianCityIfLastTokenOf3TokenNameIsInvalidThenReturnsFalse() {
+    void TestIsCAnadianCityIfLastTokenOf3TokenNameIsInvalidThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("St. John'X");
 
-        assertFalse(dict.isCanadianCity(
+        assertEquals(0, dict.isCanadianCity(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsFrenchBankIfCorrectNameThenReturnsTrue() {
+    void TestIsFrenchBankIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Banque Francaise");
 
-        assertTrue(dict.isFrenchBank(
+        assertNotEquals(0, dict.isFrenchBank(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsFrenchBankIfIncorrectNameThenReturnsFalse() {
+    void TestIsFrenchBankIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("foo bar");
 
-        assertFalse(dict.isFrenchBank(
+        assertEquals(0, dict.isFrenchBank(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsFrenchBankIfLongButCorrectNameThenReturnsTrue() {
+    void TestIsFrenchBankIfLongButCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Banque de l'Union Europeenne");
 
-        assertTrue(dict.isFrenchBank(
+        assertNotEquals(0, dict.isFrenchBank(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsJapaneseCompanyIfIncorrectNameThenReturnsFalse() {
+    void TestIsFrenchBankIfLongButCorrectNameThenReturnsNumberOfTokensComprisingThatName() {
+        Tokenizer tokenizer = new Tokenizer("Banque de l'Union Europeenne");
+
+        assertEquals(5, dict.isFrenchBank(
+            stemmer.stemTokens(tokenizer.scanTokens()), 0
+        ));
+    }
+
+    @Test
+    void TestIsJapaneseCompanyIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("asdf");
 
-        assertFalse(dict.isJapaneseCompany(
+        assertEquals(0, dict.isJapaneseCompany(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsJapaneseCompanyIfCorrectNameThenReturnsTrue() {
+    void TestIsJapaneseCompanyIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Toyota");
 
-        assertTrue(dict.isJapaneseCompany(
+        assertNotEquals(0, dict.isJapaneseCompany(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsStateInUSAIfIncorrectNameThenReturnsFalse() {
+    void TestIsStateInUSAIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("hjkl");
 
-        assertFalse(dict.isStateInUSA(
+        assertEquals(0, dict.isStateInUSA(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsStateInUSAIfCorrectNameThenReturnsTrue() {
+    void TestIsStateInUSAIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("New York");
 
-        assertTrue(dict.isStateInUSA(
+        assertNotEquals(0, dict.isStateInUSA(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestisCapitalOfWestGermanIfEmptyTokenListThenReturnsFalse() {
-        assertFalse(dict.isCapitalOfWestGerman(new ArrayList<Token>(), 0));
+    void TestisCapitalOfWestGermanIfEmptyTokenListThenReturnsZero() {
+        assertEquals(0, dict.isCapitalOfWestGerman(new ArrayList<Token>(), 0));
     }
 
     @Test
-    void TestisCapitalOfWestGermanIfIncorrectNameThenReturnsFalse() {
+    void TestisCapitalOfWestGermanIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("womp womp");
 
-        assertFalse(dict.isCapitalOfWestGerman(
+        assertEquals(0, dict.isCapitalOfWestGerman(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestisCapitalOfWestGermanIfCorrectNameThenReturnsTrue() {
+    void TestisCapitalOfWestGermanIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Bonn");
 
-        assertTrue(dict.isCapitalOfWestGerman(
+        assertNotEquals(0, dict.isCapitalOfWestGerman(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCaptialOfUSAIfIncorrectNameThenReturnsFalse() {
+    void TestIsCaptialOfUSAIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("A!");
 
-        assertFalse(dict.isCapitalOfUSA(
+        assertEquals(0, dict.isCapitalOfUSA(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCapitalOfUSAIfCorrectNameThenReturnsTrue() {
+    void TestIsCapitalOfUSAIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Washington");
 
-        assertTrue(dict.isCapitalOfUSA(
+        assertNotEquals(0, dict.isCapitalOfUSA(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCaptialOfFranceIfIncorrectNameThenReturnsFalse() {
+    void TestIsCaptialOfFranceIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Json");
 
-        assertFalse(dict.isCapitalOfFrance(
+        assertEquals(0, dict.isCapitalOfFrance(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCapitalOfFranceIfCorrectNameThenReturnsTrue() {
+    void TestIsCapitalOfFranceIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Paris");
 
-        assertTrue(dict.isCapitalOfFrance(
+        assertNotEquals(0, dict.isCapitalOfFrance(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCaptialOfUKIfIncorrectNameThenReturnsFalse() {
+    void TestIsCaptialOfUKIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Hogward");
 
-        assertFalse(dict.isCapitalOfUK(
+        assertEquals(0, dict.isCapitalOfUK(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCapitalOfUKIfCorrectNameThenReturnsTrue() {
+    void TestIsCapitalOfUKIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Londyn");
 
-        assertTrue(dict.isCapitalOfUK(
+        assertNotEquals(0, dict.isCapitalOfUK(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCaptialOfCanadaIfIncorrectNameThenReturnsFalse() {
+    void TestIsCaptialOfCanadaIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Khartoum");
 
-        assertFalse(dict.isCapitalOfCanada(
+        assertEquals(0, dict.isCapitalOfCanada(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCapitalOfCanadaIfCorrectNameThenReturnsTrue() {
+    void TestIsCapitalOfCanadaIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Ottawa");
 
-        assertTrue(dict.isCapitalOfCanada(
+        assertNotEquals(0, dict.isCapitalOfCanada(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCaptialOfJapanIfIncorrectNameThenReturnsFalse() {
+    void TestIsCaptialOfJapanIfIncorrectNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Kyoto");
 
-        assertFalse(dict.isCapitalOfJapan(
+        assertEquals(0, dict.isCapitalOfJapan(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCapitalOfJapanIfCorrectNameThenReturnsTrue() {
+    void TestIsCapitalOfJapanIfCorrectNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("Tokyo");
 
-        assertTrue(dict.isCapitalOfJapan(
+        assertNotEquals(0, dict.isCapitalOfJapan(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsWestGermanCurrencyIfInvalidNameThenReturnsFalse() {
+    void TestIsWestGermanCurrencyIfInvalidNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("xyzzy");
 
-        assertFalse(dict.isWestGermanCurrency(
+        assertEquals(0, dict.isWestGermanCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsWestGermanCurrencyIfNativeCurrencyNameThenReturnsTrue() {
+    void TestIsWestGermanCurrencyIfNativeCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("deutschemark");
 
-        assertTrue(dict.isWestGermanCurrency(
+        assertNotEquals(0, dict.isWestGermanCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsWestGermanCurrencyIfEnglishCurrencyNameThenReturnsTrue() {
+    void TestIsWestGermanCurrencyIfEnglishCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("mark");
 
-        assertTrue(dict.isWestGermanCurrency(
+        assertNotEquals(0, dict.isWestGermanCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsUSACurrencyNameIfInvalidNameThenReturnsFalse() {
+    void TestIsUSACurrencyNameIfInvalidNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Chronodollar");
 
-        assertFalse(dict.isUSACurrency(
+        assertEquals(0, dict.isUSACurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsUSACurrencyNameIfFullCurrencyNameThenReturnsTrue() {
+    void TestIsUSACurrencyNameIfFullCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("dollar");
 
-        assertTrue(dict.isUSACurrency(
+        assertNotEquals(0, dict.isUSACurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsUSACurrencyNameIfShortenedCurrencyNameThenReturnsTrue() {
+    void TestIsUSACurrencyNameIfShortenedCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("dlr");
 
-        assertTrue(dict.isUSACurrency(
+        assertNotEquals(0, dict.isUSACurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsUSACurrencyNameIfPartOfCanadianCurrencyNameThenReturnsFalse() {
+    void TestIsUSACurrencyNameIfPartOfCanadianCurrencyNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("canadian dollar");
 
-        assertFalse(dict.isUSACurrency(
+        assertEquals(0, dict.isUSACurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 1
         ));
     }
 
     @Test
-    void TestIsFrenchCurrencyNameIfInvalidNameThenReturnsFalse() {
+    void TestIsFrenchCurrencyNameIfInvalidNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Coins");
 
-        assertFalse(dict.isFrenchCurrency(
+        assertEquals(0, dict.isFrenchCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsFrenchCurrencyNameIfValidNameThenReturnsTrue() {
+    void TestIsFrenchCurrencyNameIfValidNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("franc");
 
-        assertTrue(dict.isFrenchCurrency(
+        assertNotEquals(0, dict.isFrenchCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsUKCurrencyNameIfInvalidNameThenReturnsFalse() {
+    void TestIsUKCurrencyNameIfInvalidNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("knut");
 
-        assertFalse(dict.isUKCurrency(
+        assertEquals(0, dict.isUKCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsUKCurrencyNameIfFullCurrencyNameThenReturnsTrue() {
+    void TestIsUKCurrencyNameIfFullCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("sterling");
 
-        assertTrue(dict.isUKCurrency(
+        assertNotEquals(0, dict.isUKCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsUKCurrencyNameIfShortenedCurrencyNameThenReturnsTrue() {
+    void TestIsUKCurrencyNameIfShortenedCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("stg");
 
-        assertTrue(dict.isUKCurrency(
+        assertNotEquals(0, dict.isUKCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCanadianCurrencyNameIfInvalidNameThenReturnsFalse() {
+    void TestIsCanadianCurrencyNameIfInvalidNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("leaf");
 
-        assertFalse(dict.isCanadianCurrency(
+        assertEquals(0, dict.isCanadianCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCanadianCurrencyNameIfFullCurrencyNameThenReturnsTrue() {
+    void TestIsCanadianCurrencyNameIfFullCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("canadian dollar");
 
-        assertTrue(dict.isCanadianCurrency(
+        assertNotEquals(0, dict.isCanadianCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsCanadianCurrencyNameIfShortenedCurrencyNameThenReturnsTrue() {
+    void TestIsCanadianCurrencyNameIfShortenedCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("canadian dlr");
 
-        assertTrue(dict.isCanadianCurrency(
+        assertNotEquals(0, dict.isCanadianCurrency(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsJapaneseCurrencyNameIfInvalidNameThenReturnsFalse() {
+    void TestIsJapaneseCurrencyNameIfInvalidNameThenReturnsZero() {
         Tokenizer tokenizer = new Tokenizer("Nuyen");
 
-        assertFalse(dict.isJapaneseCurrencty(
+        assertEquals(0, dict.isJapaneseCurrencty(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
 
     @Test
-    void TestIsJapaneseCurrencyNameIfValidCurrencyNameThenReturnsTrue() {
+    void TestIsJapaneseCurrencyNameIfValidCurrencyNameThenReturnsNonZero() {
         Tokenizer tokenizer = new Tokenizer("yen");
 
-        assertTrue(dict.isJapaneseCurrencty(
+        assertNotEquals(0, dict.isJapaneseCurrencty(
             stemmer.stemTokens(tokenizer.scanTokens()), 0
         ));
     }
