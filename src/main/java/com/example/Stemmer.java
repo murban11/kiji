@@ -15,6 +15,10 @@ public class Stemmer {
     private Set<String> stopList;
     private PorterStemmer stemmer = new PorterStemmer();
 
+    public Stemmer() {
+        this.stopList = new HashSet<>();
+    }
+
     public Stemmer(Set<String> stopList) {
         List<String> stopWords = new ArrayList<>();
 
