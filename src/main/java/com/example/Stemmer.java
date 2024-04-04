@@ -50,6 +50,7 @@ public class Stemmer {
             if (token.getType() != Token.Type.WORD
                 && token.getType() != Token.Type.CAPITALIZED_WORD
             ) {
+                result.add(token);
                 continue;
             }
 
