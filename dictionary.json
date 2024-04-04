@@ -1,0 +1,167 @@
+{
+    "P": {
+        "west_germany": [
+            "Richard Weizsaecker",
+            "Helmut Kohl",
+            "Otto Schlecht",
+            "Gerhard Stoltenberg",
+            "Helmut Schmidt",
+            "Heinz Riesenhuber",
+            "Willy Brandt",
+            "Walter Wallmann",
+            "Hans Tietmeyer",
+            "Gerhard Stoltenberg"
+        ]
+    },
+    "W": {
+        "canada": [
+            "Toronto",
+            "Montreal",
+            "Vancouver",
+            "Calgary",
+            "Edmonton",
+            "Ottawa",
+            "Winnipeg",
+            "Quebec City",
+            "Hamilton",
+            "Kitchener",
+            "London",
+            "Victoria",
+            "Halifax",
+            "Oshawa",
+            "Windsor",
+            "Saskatoon",
+            "Regina",
+            "St. John's",
+            "Barrie",
+            "Sherbrooke"
+        ]
+    },
+    "O": {
+        "france": [
+            "Banque Francaise",
+            "Banque Nationale de Paris",
+            "Credit Lyonnais",
+            "Societe Generale",
+            "Credit Agricole",
+            "Banque Indosuez",
+            "Banque Paribas",
+            "Credit Industriel et Commercial",
+            "Banque de l'Union Europeenne",
+            "Banque Hervet"
+        ]
+    },
+    "C": {
+        "japan": [
+            "Toyota",
+            "Sony",
+            "Honda",
+            "Nissan",
+            "Mitsubishi",
+            "Hitachi",
+            "Toshiba",
+            "Canon",
+            "Suzuki",
+            "Mazda",
+            "Fujitsu"
+        ]
+    },
+    "H": {
+        "usa": [
+            "Alabama",
+            "Alaska",
+            "Arizona",
+            "Arkansas",
+            "California",
+            "Colorado",
+            "Connecticut",
+            "Delaware",
+            "Florida",
+            "Georgia",
+            "Hawaii",
+            "Idaho",
+            "Illinois",
+            "Indiana",
+            "Iowa",
+            "Kansas",
+            "Kentucky",
+            "Louisiana",
+            "Maine",
+            "Maryland",
+            "Massachusetts",
+            "Michigan",
+            "Minnesota",
+            "Mississippi",
+            "Missouri",
+            "Montana",
+            "Nebraska",
+            "Nevada",
+            "New Hampshire",
+            "New Jersey",
+            "New Mexico",
+            "New York",
+            "North Carolina",
+            "North Dakota",
+            "Ohio",
+            "Oklahoma",
+            "Oregon",
+            "Pennsylvania",
+            "Rhode Island",
+            "South Carolina",
+            "South Dakota",
+            "Tennessee",
+            "Texas",
+            "Utah",
+            "Vermont",
+            "Virginia",
+            "Washington",
+            "West Virginia",
+            "Wisconsin",
+            "Wyoming"
+        ]
+    },
+    "s": {
+        "west_germany": [
+            "Bonn"
+        ],
+        "usa": [
+            "Washington"
+        ],
+        "france": [
+            "Paris"
+        ],
+        "uk": [
+            "Londyn"
+        ],
+        "canada": [
+            "Ottawa"
+        ],
+        "japan": [
+            "Tokyo"
+        ]
+    },
+    "m": {
+        "west_germany": [
+            "deutschemark",
+            "mark"
+        ],
+        "usa": [
+            "dollar",
+            "dlr"
+        ],
+        "france": [
+            "franc"
+        ],
+        "uk": [
+            "sterling",
+            "stg"
+        ],
+        "canada": [
+            "canadian dollar",
+            "canadian dlr"
+        ],
+        "japan": [
+            "yen"
+        ]
+    }
+}
