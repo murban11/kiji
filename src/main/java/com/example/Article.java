@@ -1,23 +1,33 @@
 package com.example;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Article {
 
     private String title;
-    private List<String> labels;
+    private LABEL label;
     private String content;
 
-    public Article() {
-        this.title = "";
-        this.labels = new ArrayList<>();
-        this.content = "";
+    public static enum LABEL {
+        WEST_GERMANY,
+        USA,
+        FRANCE,
+        UK,
+        CANADA,
+        JAPAN
+    };
+
+    public static boolean isValidLabel(String name) {
+        for (LABEL label : LABEL.values()) {
+            if (label.name().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public Article(String title, List<String> labels, String content) {
+    public Article(String title, LABEL label, String content) {
         this.title = title;
-        this.labels = new ArrayList<>(labels);
+        this.label = label;
         this.content = content;
     }
 
@@ -25,23 +35,11 @@ public class Article {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public List<String> getLabels() {
-        return new ArrayList<>(labels);
-    }
-
-    public void addLabel(String label) {
-        this.labels.addLast(label);
+    public LABEL getLabel() {
+        return label;
     }
 
     public String getContent() {
         return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 }

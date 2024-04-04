@@ -1,5 +1,8 @@
 package com.example;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -14,6 +17,11 @@ public class DatasetHandler extends DefaultHandler {
     private Dataset dataset;
     private StringBuilder elementValue;
     private boolean inPlaces;
+    private boolean containsUnsupportedLabels;
+
+    private String title;
+    private List<Article.LABEL> labels;
+    private String content;
 
     @Override
     public void characters(
@@ -43,8 +51,9 @@ public class DatasetHandler extends DefaultHandler {
     ) throws SAXException {
         switch (qName) {
             case PLACES:
-                dataset.addArticle(new Article());
+                this.labels = new ArrayList<>();
                 inPlaces = true;
+                containsUnsupportedLabels = false;
                 break;
             case D:
                 if (inPlaces) {
@@ -72,20 +81,32 @@ public class DatasetHandler extends DefaultHandler {
                 break;
             case D:
                 if (inPlaces) {
-                    getLastArticle().addLabel(elementValue.toString());
+                    String labelStr = elementValue.toString();
+                    if (Article.isValidLabel(labelStr)) {
+                        labels.add(
+                            Article.LABEL.valueOf(labelStr.toUpperCase())
+                        );
+                    } else {
+                        containsUnsupportedLabels = true;
+                    }
                 }
                 break;
             case TITLE:
-                getLastArticle().setTitle(elementValue.toString());
+                this.title = elementValue.toString();
                 break;
             case BODY:
-                getLastArticle().setContent(elementValue.toString());
+                this.content = elementValue.toString();
+
+                if (labels.size() == 1 && !containsUnsupportedLabels) {
+                    dataset.addArticle(
+                        new Article(
+                            this.title, this.labels.get(0), this.content
+                        )
+                    );
+                }
+
                 break;
         }
-    }
-
-    private Article getLastArticle() {
-        return dataset.getArticle(dataset.getSize() - 1);
     }
 
     public Dataset getDataset() {
