@@ -379,7 +379,7 @@ public class FeatureVector {
         return output;
     }
 
-    public static float getStringsSimilarity(String s1, String s2) {
+    private static float getStringsSimilarity(String s1, String s2) {
         int s1len = s1.length();
         int s2len = s2.length();
 
@@ -400,7 +400,7 @@ public class FeatureVector {
         return (1.0f / (float)(len - 2)) * (float)sum;
     }
 
-    public static float getTitlesSimilarity(List<Token> t1, List<Token> t2) {
+    private static float getTitlesSimilarity(List<Token> t1, List<Token> t2) {
         Set<String> t1set = new HashSet<String>();
         for (Token token : t1) {
             t1set.add(token.getValue());
