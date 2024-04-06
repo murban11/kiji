@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map.Entry;
 
 public class FeatureVector {
 
@@ -157,11 +158,7 @@ public class FeatureVector {
                     - (canadianCityTokenCount - canadianCityNameCount));
 
         if (acronymCounts.size() > 0) {
-            this.mostFrequentAcronym = sortAcronyms(acronymCounts)
-                .entrySet()
-                .iterator()
-                .next()
-                .getKey();
+            this.mostFrequentAcronym = getMostFrequentAcronym(acronymCounts);
         }
     }
 
@@ -323,32 +320,23 @@ public class FeatureVector {
         }
     }
 
-    private static Map<String, Integer> sortAcronyms(
-        Map<String, Integer> map
+    private static String getMostFrequentAcronym(
+        Map<String, Integer> acronyms
     ) {
-        List<Map.Entry<String, Integer>> list = new LinkedList<>(map.entrySet());
+        int max_count = 0;
+        String most_frequent = "";
 
-        Collections.sort(list, new ValueThenKeyComparator<String, Integer>());
+        for (Entry<String, Integer> a : acronyms.entrySet()) {
+            if (a.getValue() > max_count
+                || a.getValue() == max_count
+                    && a.getKey().compareTo(most_frequent) < 0) {
 
-        Map<String, Integer> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Integer> entry : list) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-        return sortedMap;
-    }
-
-    private static class ValueThenKeyComparator
-        <K extends Comparable<? super K>, V extends Comparable<? super V>>
-        implements Comparator<Map.Entry<K, V>> {
-
-        public int compare(Map.Entry<K, V> a, Map.Entry<K, V> b) {
-            int cmp1 = b.getValue().compareTo(a.getValue());
-            if (cmp1 != 0) {
-                return cmp1;
-            } else {
-                return a.getKey().compareTo(b.getKey());
+                max_count = a.getValue();
+                most_frequent = a.getKey();
             }
         }
+
+        return most_frequent;
     }
 
     private static int getHammingDistance(
