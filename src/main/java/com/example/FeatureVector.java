@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -50,6 +51,8 @@ public class FeatureVector {
 
         int canadianCityNameCount = 0;
         int canadianCityTokenCount = 0;
+
+        Map<String, Integer> acronymCounts = new HashMap<>();
 
         for (int i = 0; i < content.size(); ++i) {
             int count = dict.isWestGermanyPolitician(content, i);
@@ -112,20 +115,29 @@ public class FeatureVector {
                 }
             }
 
-            if (content.get(i).getType() == Token.Type.CAPITALIZED_WORD
+            Token curr = content.get(i);
+
+            if (curr.getType() == Token.Type.CAPITALIZED_WORD
                 && this.firstCapitalizedWord.isEmpty()) {
 
-                this.firstCapitalizedWord = content.get(i).getValue();
+                this.firstCapitalizedWord = curr.getValue();
             }
 
-            if (content.get(i).getType() == Token.Type.NUMBER
+            if (curr.getType() == Token.Type.NUMBER
                 && this.firstNumber.isEmpty()) {
 
-                this.firstNumber = content.get(i).getValue();
+                this.firstNumber = curr.getValue();
             }
 
-            if (content.get(i).getType() == Token.Type.ACRONIM) {
-                this.mostFrequentAcronym = content.get(i).getValue();
+            if (curr.getType() == Token.Type.ACRONIM) {
+                if (acronymCounts.containsKey(curr.getValue())) {
+                    acronymCounts.put(
+                        curr.getValue(),
+                        acronymCounts.get(curr.getValue()) + 1
+                    );
+                } else {
+                    acronymCounts.put(curr.getValue(), 1);
+                }
             }
         }
 
@@ -133,6 +145,22 @@ public class FeatureVector {
             = (float)canadianCityNameCount
                 / (float)(content.size()
                     - (canadianCityTokenCount - canadianCityNameCount));
+
+        if (acronymCounts.size() > 0) {
+            this.mostFrequentAcronym = sortAcronyms(acronymCounts)
+                .entrySet()
+                .iterator()
+                .next()
+                .getKey();
+        }
+    }
+
+    public float getSimilarity(
+        FeatureVector other,
+        int westGermanPoliticianMaxCount,
+        float canadianCityMaxFreq
+    ) {
+        return 0.0f;
     }
 
     public int getWestGermanPoliticianCount() {
@@ -227,8 +255,33 @@ public class FeatureVector {
         return this.label;
     }
 
-    public static Map<String, Integer> sortMapByValues(
-        HashMap<String, Integer> map
+    public static class SimilarityComparator
+        implements Comparator<FeatureVector> {
+
+        FeatureVector vector;
+        int westGermanPoliticianMaxCount;
+        float canadianCityMaxFreq;
+
+        public SimilarityComparator(
+            FeatureVector vector,
+            int westGermanPoliticianMaxCount,
+            float canadianCityMaxFreq
+        ) {
+            this.vector = vector;
+            this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
+            this.canadianCityMaxFreq = canadianCityMaxFreq;
+        }
+
+        @Override
+        public int compare(FeatureVector arg0, FeatureVector arg1) {
+            throw new UnsupportedOperationException(
+                "Unimplemented method 'compare'"
+            );
+        }
+    }
+
+    private static Map<String, Integer> sortAcronyms(
+        Map<String, Integer> map
     ) {
         List<Map.Entry<String, Integer>> list = new LinkedList<>(map.entrySet());
 
@@ -239,5 +292,20 @@ public class FeatureVector {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
         return sortedMap;
+    }
+
+    private static class ValueThenKeyComparator
+        <K extends Comparable<? super K>, V extends Comparable<? super V>>
+        implements Comparator<Map.Entry<K, V>> {
+
+        public int compare(Map.Entry<K, V> a, Map.Entry<K, V> b) {
+            int cmp1 = b.getValue().compareTo(a.getValue());
+            if (cmp1 != 0) {
+                return cmp1;
+            } else {
+                return a.getKey().compareTo(b.getKey());
+            }
+        }
+
     }
 }

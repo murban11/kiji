@@ -1030,7 +1030,7 @@ public class FeatureVectorTest {
     @Test
     void TestGetMostFrequentAcronymIfMultipleAcronymsWithDifferentFrequenciesThenReturnsTheMostFrequentOne() {
         Tokenizer tokenizer = new Tokenizer("""
-            K.I.S.S. foo K.I.S.S. bar U.W.U. baz U.W.U. qux K.I.S.S. spam
+            K.I.S.S. foo K.I.S.S. bar U.W.U. baz U.W.U. qux A.A.A.A. spam
             A.R.C.H. eggs U.W.U.
         """);
         FeatureVector features = new FeatureVector(
@@ -1046,7 +1046,7 @@ public class FeatureVectorTest {
     @Test
     void TestGetMostFrequentAcronymIfTwoAcronymsAreMostFrequentThenReturnsTheOneThatIsFirstAlphabetically() {
         Tokenizer tokenizer = new Tokenizer("""
-            K.I.S.S. foo A.R.C.H. bar K.I.S.S. baz A.R.C.H.
+            K.I.S.S. foo A.R.C.H. bar K.I.S.S. baz A.R.C.H. qux A.L.A.
         """);
         FeatureVector features = new FeatureVector(
             stemmer.stemTokens(tokenizer.scanTokens()), title, dict
@@ -1056,5 +1056,21 @@ public class FeatureVectorTest {
             .get(2).getValue();
 
         assertEquals(expected, features.getMostFrequentAcronym());
+    }
+
+    @Test
+    void TestGetSimilarityIfTheSameFeaturesThenReturnsZero() {
+        String text = "foo Bar Japan a.k.a. nihon 22 baz California";
+        Tokenizer t1 = new Tokenizer(text);
+        Tokenizer t2 = new Tokenizer(text);
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        assertEquals(0.0f, f1.getSimilarity(f2, 2, 2), delta);
     }
 }
