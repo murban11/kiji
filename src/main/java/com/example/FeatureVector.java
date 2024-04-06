@@ -1,6 +1,5 @@
 package com.example;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +23,9 @@ public class FeatureVector {
     private String firstNumber;
     private String mostFrequentAcronym;
     private List<Token> title;
+    private Set<String> titleHashed;
+
+    private Set<String> firstCapitalizedWordGrams;
 
     private Optional<Article.LABEL> label = Optional.empty();
 
@@ -48,6 +50,11 @@ public class FeatureVector {
         this.capitals = new HashMap<>();
         this.currencies = new HashMap<>();
         this.title = title;
+
+        this.titleHashed = new HashSet<String>(title.size());
+        for (Token token : title) {
+            this.titleHashed.add(token.getValue());
+        }
 
         for (Article.LABEL country : Article.LABEL.values()) {
             this.capitals.put(country, false);
@@ -157,6 +164,9 @@ public class FeatureVector {
         if (acronymCounts.size() > 0) {
             this.mostFrequentAcronym = getMostFrequentAcronym(acronymCounts);
         }
+
+        this.firstCapitalizedWordGrams
+            = generateNGrams(3, this.firstCapitalizedWord);
     }
 
     public float getSimilarity(
@@ -182,14 +192,17 @@ public class FeatureVector {
                 ? 1.0f : 0.0f,
             1.0f - getHammingDistance(this.capitals, other.capitals) / 6.0f,
             1.0f - getHammingDistance(this.currencies, other.currencies) / 6.0f,
-            getStringsSimilarity(
-                this.firstCapitalizedWord, other.firstCapitalizedWord
+            getGramsSimilarity(
+                this.firstCapitalizedWordGrams,
+                other.firstCapitalizedWordGrams,
+                other.firstCapitalizedWord.length(),
+                other.firstCapitalizedWord.length()
             ),
             (this.getFirstNumber().equals(other.getFirstNumber()))
                 ? 1.0f : 0.0f,
             (this.getMostFrequentAcronym().equals(other.getMostFrequentAcronym()))
                 ? 1.0f : 0.0f,
-            getTitlesSimilarity(this.title, other.title),
+            getTitlesSimilarity(this.titleHashed, other.titleHashed),
         };
 
         float sum = 0.0f;
@@ -310,10 +323,20 @@ public class FeatureVector {
         }
 
         @Override
-        public int compare(FeatureVector arg0, FeatureVector arg1) {
-            throw new UnsupportedOperationException(
-                "Unimplemented method 'compare'"
-            );
+        public int compare(FeatureVector v1, FeatureVector v2) {
+            int np = this.westGermanPoliticianMaxCount;
+            float cf = this.canadianCityMaxFreq;
+
+            float s1 = this.vector.getSimilarity(v1, np, cf);
+            float s2 = this.vector.getSimilarity(v2, np, cf);
+
+            if (s1 > s2) {
+                return -1;
+            } else if (s1 < s2) {
+                return 1;
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -353,8 +376,11 @@ public class FeatureVector {
         return dist;
     }
 
-    private static List<String> generateNGrams(int N, String input) {
-        List<String> output = new ArrayList<>();
+    private static Set<String> generateNGrams(int N, String input) {
+        int init_capacity = input.length() - 2;
+        if (init_capacity <= 0) return new HashSet<>();
+
+        Set<String> output = new HashSet<>(init_capacity);
         int maxStartIndex = (input.length() == N) ? 1 : input.length() - N;
 
         for (int i = 0; i < maxStartIndex; ++i) {
@@ -364,45 +390,35 @@ public class FeatureVector {
         return output;
     }
 
-    private static float getStringsSimilarity(String s1, String s2) {
-        int s1len = s1.length();
-        int s2len = s2.length();
-
-        if (s1len == 0 && s2len == 0 || s1.equals(s2)) return 1.0f;
+    private static float getGramsSimilarity(
+        Set<String> g1,
+        Set<String> g2,
+        int s1len,
+        int s2len
+    ) {
+        if (s1len == 0 && s2len == 0) return 1.0f;
         else if (s1len < 3 || s2len < 3) return 0.0f;
 
-        List<String> g1 = generateNGrams(3, s1);
-        List<String> g2 = generateNGrams(3, s2);
-
         int sum = 0;
+
+        int len = (s1len > s2len) ? s1len : s2len;
 
         for (String gram : g1) {
             if (g2.contains(gram)) sum += 1;
         }
 
-        int len = (s1len > s2len) ? s1len : s2len;
-
         return (1.0f / (float)(len - 2)) * (float)sum;
     }
 
-    private static float getTitlesSimilarity(List<Token> t1, List<Token> t2) {
-        Set<String> t1set = new HashSet<String>();
-        for (Token token : t1) {
-            t1set.add(token.getValue());
-        }
-        Set<String> t2set = new HashSet<String>();
-        for (Token token : t2) {
-            t2set.add(token.getValue());
-        }
-
+    private static float getTitlesSimilarity(Set<String> t1, Set<String> t2) {
         int sum = 0;
 
-        for (String s : t1set) {
-            if (t2set.contains(s)) sum += 1;
+        for (String s : t1) {
+            if (t2.contains(s)) sum += 1;
         }
 
-        int t1len = t1set.size();
-        int t2len = t2set.size();
+        int t1len = t1.size();
+        int t2len = t2.size();
         int len = (t1len > t2len) ? t1len : t2len;
 
         if (t1len == 0 && t2len == 0) return 1.0f;
