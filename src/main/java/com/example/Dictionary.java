@@ -112,6 +112,13 @@ public class Dictionary {
         return isValidEntry(capital, tokens, pos);
     }
 
+    public int isCapital(Article.LABEL label, List<Token> tokens, int pos) {
+        List<List<Token>> currency
+            = this.data.get("s").get(label.name().toLowerCase());
+
+        return isValidEntry(currency, tokens, pos);
+    }
+
     public int isWestGermanCurrency(List<Token> tokens, int pos) {
         List<List<Token>> currency = this.data.get("m").get("west_germany");
 
@@ -149,6 +156,13 @@ public class Dictionary {
 
     public int isJapaneseCurrencty(List<Token> tokens, int pos) {
         List<List<Token>> currency = this.data.get("m").get("japan");
+
+        return isValidEntry(currency, tokens, pos);
+    }
+
+    public int isCurrency(Article.LABEL label, List<Token> tokens, int pos) {
+        List<List<Token>> currency
+            = this.data.get("m").get(label.name().toLowerCase());
 
         return isValidEntry(currency, tokens, pos);
     }
