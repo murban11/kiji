@@ -2,7 +2,9 @@ package com.example;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1059,7 +1061,7 @@ public class FeatureVectorTest {
     }
 
     @Test
-    void TestGetSimilarityIfTheSameFeaturesThenReturnsZero() {
+    void TestGetSimilarityIfTheSameFeaturesThenReturnsOne() {
         String text = "foo Bar Japan a.k.a. nihon 22 baz California";
         Tokenizer t1 = new Tokenizer(text);
         Tokenizer t2 = new Tokenizer(text);
@@ -1071,6 +1073,292 @@ public class FeatureVectorTest {
             stemmer.stemTokens(t2.scanTokens()), title, dict
         );
 
-        assertEquals(0.0f, f1.getSimilarity(f2, 2, 2), delta);
+        assertEquals(0, f1.getWestGermanPoliticianCount());
+        assertEquals(0, f2.getWestGermanPoliticianCount());
+
+        assertEquals(1.0f, f1.getSimilarity(f2, 2, 2), delta);
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyWestGermanyPoliticianCountDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("""
+            foo
+            richard weizsaecker
+            bar
+            helmut kohl
+            baz
+        """); // 2
+        Tokenizer t2 = new Tokenizer("""
+            lorem
+            otto schlecht
+            ipsum
+            gerhard stoltenberg
+            dolor
+            heinz riesenhuber
+        """); // 3
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        int np_max = 8;
+        float u = (float)(1.0f - Math.abs(2 - 3)/(float)np_max);
+        float d = (float)Math.sqrt(Math.pow(u - 1, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, np_max, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyCanadianCityFreqDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("""
+            foo
+            toronto
+            bar
+            montreal
+            baz
+            vancouver
+            qux
+            calgary
+        """); // 4/8=0.5
+        Tokenizer t2 = new Tokenizer("""
+            edmonton
+            oshawa
+            winnipeg
+            lorem
+        """); // 3/4=0.75
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float fw_max = 0.9f;
+        float u = (float)(1.0f - Math.abs(0.5 - 0.75)/(float)fw_max);
+        float d = (float)Math.sqrt(Math.pow(u - 1.0f, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, fw_max));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyFrenchBankPresenceDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("foo credit agricole bar baz");
+        Tokenizer t2 = new Tokenizer("lorem ipsum dolor");
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float d = (float)Math.sqrt(1.0 + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyUKAcronymPresenceDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("F.O.O. sth U.K. womp womp F.O.O.");
+        Tokenizer t2 = new Tokenizer("F.O.O. sth womp womp F.O.O.");
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float d = (float)Math.sqrt(1.0 + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyJapaneseCompanyPresenceDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("foo bar toyota baz");
+        Tokenizer t2 = new Tokenizer("foo bar baz");
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float d = (float)Math.sqrt(1.0 + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyUSAStatePresenceDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("foo bar mississippi baz");
+        Tokenizer t2 = new Tokenizer("foo bar baz");
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float d = (float)Math.sqrt(1.0 + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyCapitalsPresenceDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("""
+            foo bonn bar paris baz qux
+        """); // 101000
+        Tokenizer t2 = new Tokenizer("""
+            foo paris tokyo
+        """); // 001011
+        // H(101000, 001001) = 2
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float u = 1.0f - 2.0f / 6.0f;
+        float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyCurrenciesPresenceDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("""
+            foo deutschemark bar franc baz stg qux
+        """); // 101100
+        Tokenizer t2 = new Tokenizer("""
+            foo mark bar dollar baz yen qux
+        """); // 110001
+        // H(101100, 110001) = 4
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float u = 1.0f - 4.0f / 6.0f;
+        float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyFirstCapitalizedWordDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("foo Compiler bar baz");
+        Tokenizer t2 = new Tokenizer("foo bar Compilation baz");
+
+        FeatureVector f1 = new FeatureVector(
+            t1.scanTokens(), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            t2.scanTokens(), title, dict
+        );
+
+        float u = (1.0f / (11.0f - 2.0f)) * 4.0f;
+        float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyFirstNumberDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("foo 22 bar baz");
+        Tokenizer t2 = new Tokenizer("foo bar 1337 baz");
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float d = (float)Math.sqrt(Math.pow(0.0 - 1.0, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyMostFrequentAcronymDiffersThenReturnsCorrectResult() {
+        Tokenizer t1 = new Tokenizer("foo A.R.C.H. bar baz");
+        Tokenizer t2 = new Tokenizer("foo bar U.W.U. baz");
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        float d = (float)Math.sqrt(Math.pow(0.0 - 1.0, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOnlyTitleDiffersThenReturnsCorrectResult() {
+        Tokenizer title1 = new Tokenizer("""
+            import data analysi busi decis make
+        """);
+        Tokenizer title2 = new Tokenizer("""
+            driven strategi leverag data effect busi decis
+        """);
+
+        Tokenizer content1 = new Tokenizer("foo bar baz");
+        Tokenizer content2 = new Tokenizer("lorem ipsum dolor");
+
+        FeatureVector f1 = new FeatureVector(
+            content1.scanTokens(), title1.scanTokens(), dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            content2.scanTokens(), title2.scanTokens(), dict
+        );
+
+        float u = 3.0f / 7.0f;
+        float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
+        float expected = 1.0f - (float)(d / Math.sqrt(12.0));
+
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+    }
+
+    @Test
+    void TestGetSimilarityIfOneOfTheVectorsWasConstructedFromEmptyTokenListThenDoesNotThrowAnException() {
+        Tokenizer t1 = new Tokenizer("");
+        Tokenizer t2 = new Tokenizer("foo bar baz");
+
+        FeatureVector f1 = new FeatureVector(
+            stemmer.stemTokens(t1.scanTokens()), title, dict
+        );
+        FeatureVector f2 = new FeatureVector(
+            stemmer.stemTokens(t2.scanTokens()), title, dict
+        );
+
+        assertDoesNotThrow(() -> f1.getSimilarity(f2, 2, 2));
     }
 }

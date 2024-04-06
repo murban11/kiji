@@ -1,13 +1,16 @@
 package com.example;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class FeatureVector {
 
@@ -41,11 +44,17 @@ public class FeatureVector {
         List<Token> title,
         Dictionary dict
     ) {
-        this.capitals = new HashMap<>();
-        this.currencies = new HashMap<>();
         this.firstCapitalizedWord = "";
         this.firstNumber = "";
         this.mostFrequentAcronym = "";
+        this.capitals = new HashMap<>();
+        this.currencies = new HashMap<>();
+        this.title = title;
+
+        for (Article.LABEL country : Article.LABEL.values()) {
+            this.capitals.put(country, false);
+            this.currencies.put(country, false);
+        }
 
         if (content.size() == 0) return;
 
@@ -109,6 +118,7 @@ public class FeatureVector {
                     this.capitals.put(country, true);
                     continue;
                 }
+
                 if (dict.isCurrency(country, content, i) > 0) {
                     this.currencies.put(country, true);
                     continue;
@@ -160,7 +170,40 @@ public class FeatureVector {
         int westGermanPoliticianMaxCount,
         float canadianCityMaxFreq
     ) {
-        return 0.0f;
+        float[] similarities = {
+            1.0f - Math.abs(
+                this.getWestGermanPoliticianCount()
+                    - other.getWestGermanPoliticianCount()
+            ) / (float)westGermanPoliticianMaxCount,
+            1.0f - Math.abs(
+                this.getCanadianCityFreq() - other.getCanadianCityFreq()
+            ) / (float)canadianCityMaxFreq,
+            (this.isFrenchBankPresent() == other.isFrenchBankPresent())
+                ? 1.0f : 0.0f,
+            (this.isUKAcronymPresent() == other.isUKAcronymPresent())
+                ? 1.0f : 0.0f,
+            (this.isJapaneseCompanyPresent() == other.isJapaneseCompanyPresent())
+                ? 1.0f : 0.0f,
+            (this.isUSAStatePresent() == other.isUSAStatePresent())
+                ? 1.0f : 0.0f,
+            1.0f - getHammingDistance(this.capitals, other.capitals) / 6.0f,
+            1.0f - getHammingDistance(this.currencies, other.currencies) / 6.0f,
+            getStringsSimilarity(
+                this.firstCapitalizedWord, other.firstCapitalizedWord
+            ),
+            (this.getFirstNumber().equals(other.getFirstNumber()))
+                ? 1.0f : 0.0f,
+            (this.getMostFrequentAcronym().equals(other.getMostFrequentAcronym()))
+                ? 1.0f : 0.0f,
+            getTitlesSimilarity(this.title, other.title),
+        };
+
+        float sum = 0.0f;
+        for (int i = 0; i < similarities.length; ++i) {
+            sum += Math.pow(similarities[i] - 1.0f, 2);
+        }
+
+        return 1.0f - (float)(Math.sqrt(sum) / Math.sqrt(12));
     }
 
     public int getWestGermanPoliticianCount() {
@@ -306,6 +349,80 @@ public class FeatureVector {
                 return a.getKey().compareTo(b.getKey());
             }
         }
+    }
 
+    private static int getHammingDistance(
+        Map<Article.LABEL, Boolean> m1,
+        Map<Article.LABEL, Boolean> m2
+    ) {
+        assert(m1.keySet().equals(m2.keySet()));
+
+        int dist = 0;
+
+        for (Article.LABEL key : m1.keySet()) {
+            if (!m1.get(key).equals(m2.get(key))) {
+                dist += 1;
+            }
+        }
+
+        return dist;
+    }
+
+    private static List<String> generateNGrams(int N, String input) {
+        List<String> output = new ArrayList<>();
+        int maxStartIndex = (input.length() == N) ? 1 : input.length() - N;
+
+        for (int i = 0; i < maxStartIndex; ++i) {
+            output.add(input.substring(i, i + N));
+        }
+
+        return output;
+    }
+
+    public static float getStringsSimilarity(String s1, String s2) {
+        int s1len = s1.length();
+        int s2len = s2.length();
+
+        if (s1len == 0 && s2len == 0 || s1.equals(s2)) return 1.0f;
+        else if (s1len < 3 || s2len < 3) return 0.0f;
+
+        List<String> g1 = generateNGrams(3, s1);
+        List<String> g2 = generateNGrams(3, s2);
+
+        int sum = 0;
+
+        for (String gram : g1) {
+            if (g2.contains(gram)) sum += 1;
+        }
+
+        int len = (s1len > s2len) ? s1len : s2len;
+
+        return (1.0f / (float)(len - 2)) * (float)sum;
+    }
+
+    public static float getTitlesSimilarity(List<Token> t1, List<Token> t2) {
+        Set<String> t1set = new HashSet<String>();
+        for (Token token : t1) {
+            t1set.add(token.getValue());
+        }
+        Set<String> t2set = new HashSet<String>();
+        for (Token token : t2) {
+            t2set.add(token.getValue());
+        }
+
+        int sum = 0;
+
+        for (String s : t1set) {
+            if (t2set.contains(s)) sum += 1;
+        }
+
+        int t1len = t1set.size();
+        int t2len = t2set.size();
+        int len = (t1len > t2len) ? t1len : t2len;
+
+        if (t1len == 0 && t2len == 0) return 1.0f;
+        else if (t1len == 0 || t2len == 0) return 0.0f;
+
+        return (float)sum / (float)len;
     }
 }
