@@ -71,6 +71,9 @@ public class Main
 
             Dictionary dict = new Dictionary(new File("dictionary.json"));
 
+            int westGermanPoliticianMaxCount = 0;
+            float canadianCityMaxFreq = 0;
+
             int trainingSize = training.getSize();
             System.out.println("\nTraining...");
             for (int i = 0; i < trainingSize; ++i) {
@@ -86,6 +89,17 @@ public class Main
                     dict,
                     Optional.of(article.getLabel())
                 );
+
+                if (vector.getWestGermanPoliticianCount()
+                    > westGermanPoliticianMaxCount) {
+
+                    westGermanPoliticianMaxCount
+                        = vector.getWestGermanPoliticianCount();
+                }
+
+                if (vector.getCanadianCityFreq() > canadianCityMaxFreq) {
+                    canadianCityMaxFreq = vector.getCanadianCityFreq();
+                }
 
                 trainingVectors.add(vector);
             }
@@ -106,6 +120,17 @@ public class Main
                     Optional.of(article.getLabel())
                 );
 
+                if (vector.getWestGermanPoliticianCount()
+                    > westGermanPoliticianMaxCount) {
+
+                    westGermanPoliticianMaxCount
+                        = vector.getWestGermanPoliticianCount();
+                }
+
+                if (vector.getCanadianCityFreq() > canadianCityMaxFreq) {
+                    canadianCityMaxFreq = vector.getCanadianCityFreq();
+                }
+
                 testingVectors.add(vector);
             }
 
@@ -113,7 +138,9 @@ public class Main
             Classifier classifier = new Classifier(
                 K,
                 trainingVectors,
-                testingVectors
+                testingVectors,
+                westGermanPoliticianMaxCount,
+                canadianCityMaxFreq
             );
             classifier.clasify();
 
