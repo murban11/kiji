@@ -13,25 +13,18 @@ public class Classifier {
     private List<FeatureVector> trainingVectors;
     private List<FeatureVector> testingVectors;
 
-    private int westGermanPoliticianMaxCount;
-    private float canadianCityMaxFreq;
-
     private Map<Article.LABEL, Map<Article.LABEL, Integer>> confusionMatrix;
 
     public Classifier(
         int K,
         List<FeatureVector> trainingVectors,
-        List<FeatureVector> testingVectors,
-        int westGermanPoliticianMaxCount,
-        float canadianCityMaxFreq
+        List<FeatureVector> testingVectors
     ) {
         assert(trainingVectors.size() > K);
 
         this.K = K;
         this.trainingVectors = trainingVectors;
         this.testingVectors = testingVectors;
-        this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
-        this.canadianCityMaxFreq = canadianCityMaxFreq;
 
         int labelCount = Article.LABEL.values().length;
         this.confusionMatrix = new HashMap<>(labelCount);
@@ -53,27 +46,15 @@ public class Classifier {
 
             Collections.sort(
                 trainingVectors,
-                new FeatureVector.DistanceComparator(
-                    vec,
-                    westGermanPoliticianMaxCount,
-                    canadianCityMaxFreq
-                )
+                new FeatureVector.DistanceComparator(vec)
             );
 
             assert(trainingVectors
                     .getFirst()
-                    .getDistance(
-                        vec,
-                        westGermanPoliticianMaxCount,
-                        canadianCityMaxFreq
-                    )
+                    .getDistance(vec)
                 > trainingVectors
                     .getLast()
-                    .getDistance(
-                        vec,
-                        westGermanPoliticianMaxCount,
-                        canadianCityMaxFreq
-                    )
+                    .getDistance(vec)
             );
 
             Map<Article.LABEL, Integer> labelCounts

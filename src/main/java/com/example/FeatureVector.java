@@ -213,11 +213,7 @@ public class FeatureVector {
         return 1.0f - (float)(Math.sqrt(sum) / Math.sqrt(12));
     }
 
-    public float getDistance(
-        FeatureVector other,
-        int westGermanPoliticianMaxCount,
-        float canadianCityMaxFreq
-    ) {
+    public float getDistance(FeatureVector other) {
         float[] distances = {
             Math.abs(
                 this.getWestGermanPoliticianCount()
@@ -391,23 +387,14 @@ public class FeatureVector {
         int westGermanPoliticianMaxCount;
         float canadianCityMaxFreq;
 
-        public DistanceComparator(
-            FeatureVector vector,
-            int westGermanPoliticianMaxCount,
-            float canadianCityMaxFreq
-        ) {
+        public DistanceComparator(FeatureVector vector) {
             this.vector = vector;
-            this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
-            this.canadianCityMaxFreq = canadianCityMaxFreq;
         }
 
         @Override
         public int compare(FeatureVector v1, FeatureVector v2) {
-            int np = this.westGermanPoliticianMaxCount;
-            float cf = this.canadianCityMaxFreq;
-
-            float s1 = this.vector.getDistance(v1, np, cf);
-            float s2 = this.vector.getDistance(v2, np, cf);
+            float s1 = this.vector.getDistance(v1);
+            float s2 = this.vector.getDistance(v2);
 
             if (s1 < s2) {
                 return -1;
