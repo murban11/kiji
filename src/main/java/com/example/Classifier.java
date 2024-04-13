@@ -53,7 +53,7 @@ public class Classifier {
 
             Collections.sort(
                 trainingVectors,
-                new FeatureVector.SimilarityComparator(
+                new FeatureVector.DistanceComparator(
                     vec,
                     westGermanPoliticianMaxCount,
                     canadianCityMaxFreq
@@ -62,14 +62,14 @@ public class Classifier {
 
             assert(trainingVectors
                     .getFirst()
-                    .getSimilarity(
+                    .getDistance(
                         vec,
                         westGermanPoliticianMaxCount,
                         canadianCityMaxFreq
                     )
                 > trainingVectors
                     .getLast()
-                    .getSimilarity(
+                    .getDistance(
                         vec,
                         westGermanPoliticianMaxCount,
                         canadianCityMaxFreq

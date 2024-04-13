@@ -213,6 +213,50 @@ public class FeatureVector {
         return 1.0f - (float)(Math.sqrt(sum) / Math.sqrt(12));
     }
 
+    public float getDistance(
+        FeatureVector other,
+        int westGermanPoliticianMaxCount,
+        float canadianCityMaxFreq
+    ) {
+        float[] distances = {
+            Math.abs(
+                this.getWestGermanPoliticianCount()
+                - other.getWestGermanPoliticianCount()
+            ),
+            Math.abs(
+                this.getCanadianCityFreq() - other.getCanadianCityFreq()
+            ),
+            (this.isFrenchBankPresent() == other.isFrenchBankPresent())
+                ? 0.0f : 1.0f,
+            (this.isUKAcronymPresent() == other.isUKAcronymPresent())
+                ? 0.0f : 1.0f,
+            (this.isJapaneseCompanyPresent() == other.isJapaneseCompanyPresent())
+                ? 0.0f : 1.0f,
+            (this.isUSAStatePresent() == other.isUSAStatePresent())
+                ? 0.0f : 1.0f,
+            getHammingDistance(this.capitals, other.capitals),
+            getHammingDistance(this.currencies, other.currencies),
+            1.0f - getGramsSimilarity(
+                this.firstCapitalizedWordGrams,
+                other.firstCapitalizedWordGrams,
+                other.firstCapitalizedWord.length(),
+                other.firstCapitalizedWord.length()
+            ),
+            (this.getFirstNumber().equals(other.getFirstNumber()))
+                ? 0.0f : 1.0f,
+            (this.getMostFrequentAcronym().equals(other.getMostFrequentAcronym()))
+                ? 0.0f : 1.0f,
+            1.0f - getTitlesSimilarity(this.titleHashed, other.titleHashed),
+        };
+
+        float sum = 0.0f;
+        for (int i = 0; i < distances.length; ++i) {
+            sum += Math.pow(distances[i], 2);
+        }
+
+        return (float)(Math.sqrt(sum) / Math.sqrt(distances.length));
+    }
+
     public int getWestGermanPoliticianCount() {
         return this.westGermanPoliticianCount;
     }
@@ -333,6 +377,41 @@ public class FeatureVector {
             if (s1 > s2) {
                 return -1;
             } else if (s1 < s2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public static class DistanceComparator
+        implements Comparator<FeatureVector> {
+
+        FeatureVector vector;
+        int westGermanPoliticianMaxCount;
+        float canadianCityMaxFreq;
+
+        public DistanceComparator(
+            FeatureVector vector,
+            int westGermanPoliticianMaxCount,
+            float canadianCityMaxFreq
+        ) {
+            this.vector = vector;
+            this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
+            this.canadianCityMaxFreq = canadianCityMaxFreq;
+        }
+
+        @Override
+        public int compare(FeatureVector v1, FeatureVector v2) {
+            int np = this.westGermanPoliticianMaxCount;
+            float cf = this.canadianCityMaxFreq;
+
+            float s1 = this.vector.getDistance(v1, np, cf);
+            float s2 = this.vector.getDistance(v2, np, cf);
+
+            if (s1 < s2) {
+                return -1;
+            } else if (s1 > s2) {
                 return 1;
             } else {
                 return 0;
