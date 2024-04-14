@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.example.FeatureVector.METRIC;
+
 public class Classifier {
 
     private int K;
@@ -16,6 +18,8 @@ public class Classifier {
     private int westGermanPoliticianMaxCount;
     private float canadianCityMaxFreq;
 
+    private METRIC metric;
+
     private Map<Article.LABEL, Map<Article.LABEL, Integer>> confusionMatrix;
 
     public Classifier(
@@ -23,7 +27,8 @@ public class Classifier {
         List<FeatureVector> trainingVectors,
         List<FeatureVector> testingVectors,
         int westGermanPoliticianMaxCount,
-        float canadianCityMaxFreq
+        float canadianCityMaxFreq,
+        METRIC metric
     ) {
         assert(trainingVectors.size() > K);
 
@@ -32,6 +37,7 @@ public class Classifier {
         this.testingVectors = testingVectors;
         this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
         this.canadianCityMaxFreq = canadianCityMaxFreq;
+        this.metric = metric;
 
         int labelCount = Article.LABEL.values().length;
         this.confusionMatrix = new HashMap<>(labelCount);
@@ -56,7 +62,8 @@ public class Classifier {
                 new FeatureVector.DistanceComparator(
                     vec,
                     westGermanPoliticianMaxCount,
-                    canadianCityMaxFreq
+                    canadianCityMaxFreq,
+                    metric
                 )
             );
 
@@ -65,14 +72,16 @@ public class Classifier {
                     .getDistance(
                         vec,
                         westGermanPoliticianMaxCount,
-                        canadianCityMaxFreq
+                        canadianCityMaxFreq,
+                        metric
                     )
                 > trainingVectors
                     .getLast()
                     .getDistance(
                         vec,
                         westGermanPoliticianMaxCount,
-                        canadianCityMaxFreq
+                        canadianCityMaxFreq,
+                        metric
                     )
             );
 

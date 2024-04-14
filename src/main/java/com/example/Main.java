@@ -10,6 +10,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import com.example.FeatureVector.METRIC;
+
 import org.apache.commons.cli.*;
 
 public class Main 
@@ -33,6 +35,14 @@ public class Main
             .build();
         options.addOption(trainingRatio);
 
+        Option metric = Option.builder("m")
+            .longOpt("metric")
+            .argName("metric")
+            .hasArg()
+            .desc("Set the metric used when comparing feature vectors")
+            .build();
+        options.addOption(metric);
+
         CommandLine cmd;
         CommandLineParser parser = new PosixParser();
 
@@ -50,6 +60,21 @@ public class Main
                 ratio = Float.parseFloat(cmd.getOptionValue("r"));
             }
             System.out.println("training ratio: " + ratio);
+
+            METRIC m = METRIC.EUCLIDEAN;
+            if (cmd.hasOption("m")) {
+                String optVal = cmd.getOptionValue("m").toLowerCase();
+                if (optVal.equals("euclidean")) {
+                    m = METRIC.EUCLIDEAN;
+                } else if (optVal.equals("taxicab")) {
+                    m = METRIC.TAXICAB;
+                } else if (optVal.equals("chebyshev")) {
+                    m = METRIC.CHEBYSHEV;
+                } else {
+                    System.err.println("Invalid -m option argument: " + optVal);
+                }
+            }
+            System.out.println("metric: " + m.toString());
 
             System.out.println();
 
@@ -140,7 +165,8 @@ public class Main
                 trainingVectors,
                 testingVectors,
                 westGermanPoliticianMaxCount,
-                canadianCityMaxFreq
+                canadianCityMaxFreq,
+                m
             );
             classifier.clasify();
 

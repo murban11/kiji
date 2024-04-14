@@ -29,6 +29,12 @@ public class FeatureVector {
 
     private Optional<Article.LABEL> label = Optional.empty();
 
+    public enum METRIC {
+        EUCLIDEAN,
+        TAXICAB,
+        CHEBYSHEV
+    };
+
     public FeatureVector(
         List<Token> content,
         List<Token> title,
@@ -216,7 +222,8 @@ public class FeatureVector {
     public float getDistance(
         FeatureVector other,
         int westGermanPoliticianMaxCount,
-        float canadianCityMaxFreq
+        float canadianCityMaxFreq,
+        METRIC metric
     ) {
         float[] distances = {
             Math.abs(
@@ -249,12 +256,30 @@ public class FeatureVector {
             1.0f - getTitlesSimilarity(this.titleHashed, other.titleHashed),
         };
 
-        float sum = 0.0f;
-        for (int i = 0; i < distances.length; ++i) {
-            sum += Math.pow(distances[i], 2);
-        }
+        if (metric == METRIC.EUCLIDEAN) {
+            float sum = 0.0f;
+            for (int i = 0; i < distances.length; ++i) {
+                sum += Math.pow(distances[i], 2);
+            }
 
-        return (float)(Math.sqrt(sum) / Math.sqrt(distances.length));
+            return (float)Math.sqrt(sum);
+        } else if (metric == METRIC.TAXICAB) {
+            float sum = 0.0f;
+            for (int i = 0; i < distances.length; ++i) {
+                sum += Math.abs(distances[i]);
+            }
+
+            return sum;
+        } else {
+            float max_dist = distances[0];
+            for (int i = 1; i < distances.length; ++i) {
+                if (distances[i] > max_dist) {
+                    max_dist = distances[i];
+                }
+            }
+
+            return max_dist;
+        }
     }
 
     public int getWestGermanPoliticianCount() {
@@ -390,15 +415,18 @@ public class FeatureVector {
         FeatureVector vector;
         int westGermanPoliticianMaxCount;
         float canadianCityMaxFreq;
+        METRIC metric;
 
         public DistanceComparator(
             FeatureVector vector,
             int westGermanPoliticianMaxCount,
-            float canadianCityMaxFreq
+            float canadianCityMaxFreq,
+            METRIC metric
         ) {
             this.vector = vector;
             this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
             this.canadianCityMaxFreq = canadianCityMaxFreq;
+            this.metric = metric;
         }
 
         @Override
@@ -406,8 +434,8 @@ public class FeatureVector {
             int np = this.westGermanPoliticianMaxCount;
             float cf = this.canadianCityMaxFreq;
 
-            float s1 = this.vector.getDistance(v1, np, cf);
-            float s2 = this.vector.getDistance(v2, np, cf);
+            float s1 = this.vector.getDistance(v1, np, cf, metric);
+            float s2 = this.vector.getDistance(v2, np, cf, metric);
 
             if (s1 < s2) {
                 return -1;
