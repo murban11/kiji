@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.example.FeatureVector.METRIC;
+import com.example.FeatureVector.FEATURE;
 
 import org.apache.commons.cli.*;
 
@@ -42,6 +43,78 @@ public class Main
             .desc("Set the metric used when comparing feature vectors")
             .build();
         options.addOption(metric);
+
+        Option disableWestGermanPoliticalCount
+            = Option.builder("disable_west_german_political_count")
+                .longOpt("disable-west-german-political-count")
+                .build();
+        options.addOption(disableWestGermanPoliticalCount);
+
+        Option disableCanadianCityFreq
+            = Option.builder("disable_canadian_city_freq")
+                .longOpt("disable-canadian-city-freq")
+                .build();
+        options.addOption(disableCanadianCityFreq);
+
+        Option disableFrenchBankPresence
+            = Option.builder("disable_french_bank_presence")
+                .longOpt("disable-french-bank-presence")
+                .build();
+        options.addOption(disableFrenchBankPresence);
+
+        Option disableUKAcronymPresence
+            = Option.builder("disable_uk_acronym_presence")
+                .longOpt("disable-uk-acronym-presence")
+                .build();
+        options.addOption(disableUKAcronymPresence);
+
+        Option disableJapaneseCompanyPresence
+            = Option.builder("disable_japanese_company_presence")
+                .longOpt("disable-japanese-company-presence")
+                .build();
+        options.addOption(disableJapaneseCompanyPresence);
+
+        Option disableUSAStatePresence
+            = Option.builder("disable_usa_state_presence")
+                .longOpt("disable-usa-state-presence")
+                .build();
+        options.addOption(disableUSAStatePresence);
+
+        Option disableCapitalsPresence
+            = Option.builder("disable_capitals_presence")
+                .longOpt("disable-capitals-presence")
+                .build();
+        options.addOption(disableCapitalsPresence);
+
+        Option disableCurrenciesPresence
+            = Option.builder("disable_currencies_presence")
+                .longOpt("disable-currencies-presence")
+                .build();
+        options.addOption(disableCurrenciesPresence);
+
+        Option disableFirstCapitalizedWord
+            = Option.builder("disable_first_capitalized_word")
+                .longOpt("disable-first-capitalized-word")
+                .build();
+        options.addOption(disableFirstCapitalizedWord);
+
+        Option disableFirstNumber
+            = Option.builder("disable_first_number")
+                .longOpt("disable-first-number")
+                .build();
+        options.addOption(disableFirstNumber);
+
+        Option disableMostFrequentAcronym
+            = Option.builder("disable_most_frequent_acronym")
+                .longOpt("disable-most-frequent-acronym")
+                .build();
+        options.addOption(disableMostFrequentAcronym);
+
+        Option disableTitle
+            = Option.builder("disable_title")
+                .longOpt("disable-title")
+                .build();
+        options.addOption(disableTitle);
 
         CommandLine cmd;
         CommandLineParser parser = new PosixParser();
@@ -75,6 +148,55 @@ public class Main
                 }
             }
             System.out.println("metric: " + m.toString());
+
+            short featureFlag = (short)0b1111111111111111;
+            if (cmd.hasOption("disable_west_german_political_count")) {
+                featureFlag ^= FEATURE.WEST_GERMAN_POLITICAL_COUNT.id;
+            }
+            if (cmd.hasOption("disable_canadian_city_freq")) {
+                featureFlag ^= FEATURE.CANADIAN_CITY_FREQ.id;
+            }
+            if (cmd.hasOption("disable_french_bank_presence")) {
+                featureFlag ^= FEATURE.FRENCH_BANK_PRESENCE.id;
+            }
+            if (cmd.hasOption("disable_uk_acronym_presence")) {
+                featureFlag ^= FEATURE.UK_ACRONYM_PRESENCE.id;
+            }
+            if (cmd.hasOption("disable_japanese_company_presence")) {
+                featureFlag ^= FEATURE.JAPANESE_COMPANY_PRESENCE.id;
+            }
+            if (cmd.hasOption("disable_usa_state_presence")) {
+                featureFlag ^= FEATURE.USA_STATE_PRESENCE.id;
+            }
+            if (cmd.hasOption("disable_capitals_presence")) {
+                featureFlag ^= FEATURE.CAPITALS_PRESENCE.id;
+            }
+            if (cmd.hasOption("disable_currencies_presence")) {
+                featureFlag ^= FEATURE.CURRENCIES_PRESENCE.id;
+            }
+            if (cmd.hasOption("disable_first_capitalized_word")) {
+                featureFlag ^= FEATURE.FIRST_CAPITALIZED_WORD.id;
+            }
+            if (cmd.hasOption("disable_first_number")) {
+                featureFlag ^= FEATURE.FIRST_NUMBER.id;
+            }
+            if (cmd.hasOption("disable_most_frequent_acronym")) {
+                featureFlag ^= FEATURE.MOST_FREQUENT_ACRONYM.id;
+            }
+            if (cmd.hasOption("disable_title")) {
+                featureFlag ^= FEATURE.TITLE.id;
+            }
+
+            System.out.println("features:");
+            for (var f : FeatureVector.FEATURE.values()) {
+                System.out.print("    ");
+                if ((featureFlag & f.id) != 0) {
+                    System.out.print("+");
+                } else {
+                    System.out.print("-");
+                }
+                System.out.println(f.toString());
+            }
 
             System.out.println();
 
@@ -166,6 +288,7 @@ public class Main
                 testingVectors,
                 westGermanPoliticianMaxCount,
                 canadianCityMaxFreq,
+                featureFlag,
                 m
             );
             classifier.clasify();

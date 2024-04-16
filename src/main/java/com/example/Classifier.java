@@ -18,6 +18,7 @@ public class Classifier {
     private int westGermanPoliticianMaxCount;
     private float canadianCityMaxFreq;
 
+    private short featureFlags;
     private METRIC metric;
 
     private Map<Article.LABEL, Map<Article.LABEL, Integer>> confusionMatrix;
@@ -28,6 +29,7 @@ public class Classifier {
         List<FeatureVector> testingVectors,
         int westGermanPoliticianMaxCount,
         float canadianCityMaxFreq,
+        short featureFlags,
         METRIC metric
     ) {
         assert(trainingVectors.size() > K);
@@ -37,6 +39,7 @@ public class Classifier {
         this.testingVectors = testingVectors;
         this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
         this.canadianCityMaxFreq = canadianCityMaxFreq;
+        this.featureFlags = featureFlags;
         this.metric = metric;
 
         int labelCount = Article.LABEL.values().length;
@@ -63,6 +66,7 @@ public class Classifier {
                     vec,
                     westGermanPoliticianMaxCount,
                     canadianCityMaxFreq,
+                    featureFlags,
                     metric
                 )
             );
@@ -73,6 +77,7 @@ public class Classifier {
                         vec,
                         westGermanPoliticianMaxCount,
                         canadianCityMaxFreq,
+                        featureFlags,
                         metric
                     )
                 > trainingVectors
@@ -81,6 +86,7 @@ public class Classifier {
                         vec,
                         westGermanPoliticianMaxCount,
                         canadianCityMaxFreq,
+                        featureFlags,
                         metric
                     )
             );

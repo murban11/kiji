@@ -18,7 +18,8 @@ public class FeatureVectorTest {
 
     private Dictionary dict;
     private Stemmer stemmer;
-    private double delta = 0.001;
+    private final static double delta = 0.001;
+    private final static short featureFlags = (short)0b1111111111111111;
     private final static List<Token> title = new ArrayList<>();
 
     @BeforeEach
@@ -1075,7 +1076,7 @@ public class FeatureVectorTest {
         assertEquals(0, f1.getWestGermanPoliticianCount());
         assertEquals(0, f2.getWestGermanPoliticianCount());
 
-        assertEquals(1.0f, f1.getSimilarity(f2, 2, 2), delta);
+        assertEquals(1.0f, f1.getSimilarity(f2, 2, 2, featureFlags), delta);
     }
 
     @Test
@@ -1108,7 +1109,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(u - 1, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, np_max, 2));
+        assertEquals(expected, f1.getSimilarity(f2, np_max, 2, featureFlags));
     }
 
     @Test
@@ -1142,7 +1143,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(u - 1.0f, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, fw_max));
+        assertEquals(expected, f1.getSimilarity(f2, 2, fw_max, featureFlags));
     }
 
     @Test
@@ -1160,7 +1161,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(1.0 + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1178,7 +1179,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(1.0 + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1196,7 +1197,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(1.0 + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1214,7 +1215,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(1.0 + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1238,7 +1239,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1262,7 +1263,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1281,7 +1282,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1299,7 +1300,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(0.0 - 1.0, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1317,7 +1318,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(0.0 - 1.0, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1343,7 +1344,7 @@ public class FeatureVectorTest {
         float d = (float)Math.sqrt(Math.pow(u - 1.0, 2) + 11.0*0.0);
         float expected = 1.0f - (float)(d / Math.sqrt(12.0));
 
-        assertEquals(expected, f1.getSimilarity(f2, 2, 2));
+        assertEquals(expected, f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 
     @Test
@@ -1358,6 +1359,6 @@ public class FeatureVectorTest {
             stemmer.stemTokens(t2.scanTokens()), title, dict
         );
 
-        assertDoesNotThrow(() -> f1.getSimilarity(f2, 2, 2));
+        assertDoesNotThrow(() -> f1.getSimilarity(f2, 2, 2, featureFlags));
     }
 }

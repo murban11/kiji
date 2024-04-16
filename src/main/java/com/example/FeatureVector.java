@@ -1,5 +1,6 @@
 package com.example;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,27 @@ public class FeatureVector {
         EUCLIDEAN,
         TAXICAB,
         CHEBYSHEV
+    };
+
+    public enum FEATURE {
+        WEST_GERMAN_POLITICAL_COUNT ((short)0b0000000000000001),
+        CANADIAN_CITY_FREQ          ((short)0b0000000000000010),
+        FRENCH_BANK_PRESENCE        ((short)0b0000000000000100),
+        UK_ACRONYM_PRESENCE         ((short)0b0000000000001000),
+        JAPANESE_COMPANY_PRESENCE   ((short)0b0000000000010000),
+        USA_STATE_PRESENCE          ((short)0b0000000000100000),
+        CAPITALS_PRESENCE           ((short)0b0000000001000000),
+        CURRENCIES_PRESENCE         ((short)0b0000000010000000),
+        FIRST_CAPITALIZED_WORD      ((short)0b0000000100000000),
+        FIRST_NUMBER                ((short)0b0000001000000000),
+        MOST_FREQUENT_ACRONYM       ((short)0b0000010000000000),
+        TITLE                       ((short)0b0000100000000000);
+
+        public final short id;
+
+        private FEATURE(short id) {
+            this.id = id;
+        }
     };
 
     public FeatureVector(
@@ -178,103 +200,207 @@ public class FeatureVector {
     public float getSimilarity(
         FeatureVector other,
         int westGermanPoliticianMaxCount,
-        float canadianCityMaxFreq
+        float canadianCityMaxFreq,
+        short featureFlags
     ) {
-        float[] similarities = {
-            1.0f - Math.abs(
-                this.getWestGermanPoliticianCount()
-                    - other.getWestGermanPoliticianCount()
-            ) / (float)westGermanPoliticianMaxCount,
-            1.0f - Math.abs(
-                this.getCanadianCityFreq() - other.getCanadianCityFreq()
-            ) / (float)canadianCityMaxFreq,
-            (this.isFrenchBankPresent() == other.isFrenchBankPresent())
-                ? 1.0f : 0.0f,
-            (this.isUKAcronymPresent() == other.isUKAcronymPresent())
-                ? 1.0f : 0.0f,
-            (this.isJapaneseCompanyPresent() == other.isJapaneseCompanyPresent())
-                ? 1.0f : 0.0f,
-            (this.isUSAStatePresent() == other.isUSAStatePresent())
-                ? 1.0f : 0.0f,
-            1.0f - getHammingDistance(this.capitals, other.capitals) / 6.0f,
-            1.0f - getHammingDistance(this.currencies, other.currencies) / 6.0f,
-            getGramsSimilarity(
-                this.firstCapitalizedWordGrams,
-                other.firstCapitalizedWordGrams,
-                other.firstCapitalizedWord.length(),
-                other.firstCapitalizedWord.length()
-            ),
-            (this.getFirstNumber().equals(other.getFirstNumber()))
-                ? 1.0f : 0.0f,
-            (this.getMostFrequentAcronym().equals(other.getMostFrequentAcronym()))
-                ? 1.0f : 0.0f,
-            getTitlesSimilarity(this.titleHashed, other.titleHashed),
-        };
+        List<Float> similarities = new ArrayList<>(FEATURE.values().length);
 
-        float sum = 0.0f;
-        for (int i = 0; i < similarities.length; ++i) {
-            sum += Math.pow(similarities[i] - 1.0f, 2);
+        if ((featureFlags & FEATURE.WEST_GERMAN_POLITICAL_COUNT.id) != 0) {
+            similarities.add(
+                1.0f - Math.abs(
+                    this.getWestGermanPoliticianCount()
+                    - other.getWestGermanPoliticianCount()
+                ) / (float)westGermanPoliticianMaxCount
+            );
+        }
+        if ((featureFlags & FEATURE.CANADIAN_CITY_FREQ.id) != 0) {
+            similarities.add(
+                1.0f - Math.abs(
+                    this.getCanadianCityFreq() - other.getCanadianCityFreq()
+                ) / (float)canadianCityMaxFreq
+            );
+        }
+        if ((featureFlags & FEATURE.FRENCH_BANK_PRESENCE.id) != 0) {
+            similarities.add(
+                (this.isFrenchBankPresent() == other.isFrenchBankPresent())
+                    ? 1.0f : 0.0f
+            );
+        }
+        if ((featureFlags & FEATURE.UK_ACRONYM_PRESENCE.id) != 0) {
+            similarities.add(
+            (this.isUKAcronymPresent() == other.isUKAcronymPresent())
+                ? 1.0f : 0.0f
+            );
+        }
+        if ((featureFlags & FEATURE.JAPANESE_COMPANY_PRESENCE.id) != 0) {
+            similarities.add(
+                (this.isJapaneseCompanyPresent()
+                    == other.isJapaneseCompanyPresent())
+                        ? 1.0f : 0.0f
+            );
+        }
+        if ((featureFlags & FEATURE.USA_STATE_PRESENCE.id) != 0) {
+            similarities.add(
+                (this.isUSAStatePresent() == other.isUSAStatePresent())
+                    ? 1.0f : 0.0f
+            );
+        }
+        if ((featureFlags & FEATURE.CAPITALS_PRESENCE.id) != 0) {
+            similarities.add(
+                1.0f - getHammingDistance(this.capitals, other.capitals)
+                    / 6.0f
+            );
+        }
+        if ((featureFlags & FEATURE.CURRENCIES_PRESENCE.id) != 0) {
+            similarities.add(
+                1.0f - getHammingDistance(this.currencies, other.currencies)
+                    / 6.0f
+            );
+        }
+        if ((featureFlags & FEATURE.FIRST_CAPITALIZED_WORD.id) != 0) {
+            similarities.add(
+                getGramsSimilarity(
+                    this.firstCapitalizedWordGrams,
+                    other.firstCapitalizedWordGrams,
+                    other.firstCapitalizedWord.length(),
+                    other.firstCapitalizedWord.length()
+                )
+            );
+        }
+        if ((featureFlags & FEATURE.FIRST_NUMBER.id) != 0) {
+            similarities.add(
+                (this.getFirstNumber().equals(other.getFirstNumber()))
+                    ? 1.0f : 0.0f
+            );
+        }
+        if ((featureFlags & FEATURE.MOST_FREQUENT_ACRONYM.id) != 0) {
+            similarities.add(
+                (this.getMostFrequentAcronym()
+                    .equals(other.getMostFrequentAcronym()))
+                        ? 1.0f : 0.0f
+            );
+        }
+        if ((featureFlags & FEATURE.TITLE.id) != 0) {
+            similarities.add(
+                getTitlesSimilarity(this.titleHashed, other.titleHashed)
+            );
         }
 
-        return 1.0f - (float)(Math.sqrt(sum) / Math.sqrt(12));
+        float sum = 0.0f;
+        for (float diff : similarities) {
+            sum += Math.pow(diff - 1.0f, 2);
+        }
+
+        return 1.0f - (float)(Math.sqrt(sum) / Math.sqrt(similarities.size()));
     }
 
     public float getDistance(
         FeatureVector other,
         int westGermanPoliticianMaxCount,
         float canadianCityMaxFreq,
+        short featureFlags,
         METRIC metric
     ) {
-        float[] distances = {
-            Math.abs(
-                this.getWestGermanPoliticianCount()
-                - other.getWestGermanPoliticianCount()
-            ) / (float)westGermanPoliticianMaxCount,
-            Math.abs(
-                this.getCanadianCityFreq() - other.getCanadianCityFreq()
-            ) / (float)canadianCityMaxFreq,
-            (this.isFrenchBankPresent() == other.isFrenchBankPresent())
-                ? 0.0f : 1.0f,
-            (this.isUKAcronymPresent() == other.isUKAcronymPresent())
-                ? 0.0f : 1.0f,
-            (this.isJapaneseCompanyPresent() == other.isJapaneseCompanyPresent())
-                ? 0.0f : 1.0f,
-            (this.isUSAStatePresent() == other.isUSAStatePresent())
-                ? 0.0f : 1.0f,
-            getHammingDistance(this.capitals, other.capitals) / 6.0f,
-            getHammingDistance(this.currencies, other.currencies) / 6.0f,
-            1.0f - getGramsSimilarity(
-                this.firstCapitalizedWordGrams,
-                other.firstCapitalizedWordGrams,
-                other.firstCapitalizedWord.length(),
-                other.firstCapitalizedWord.length()
-            ),
-            (this.getFirstNumber().equals(other.getFirstNumber()))
-                ? 0.0f : 1.0f,
-            (this.getMostFrequentAcronym().equals(other.getMostFrequentAcronym()))
-                ? 0.0f : 1.0f,
-            1.0f - getTitlesSimilarity(this.titleHashed, other.titleHashed),
-        };
+        List<Float> distances = new ArrayList<>(FEATURE.values().length);
+
+        if ((featureFlags & FEATURE.WEST_GERMAN_POLITICAL_COUNT.id) != 0) {
+            distances.add(
+                Math.abs(
+                    this.getWestGermanPoliticianCount()
+                    - other.getWestGermanPoliticianCount()
+                ) / (float)westGermanPoliticianMaxCount
+            );
+        }
+        if ((featureFlags & FEATURE.CANADIAN_CITY_FREQ.id) != 0) {
+            distances.add(
+                Math.abs(
+                    this.getCanadianCityFreq() - other.getCanadianCityFreq()
+                ) / (float)canadianCityMaxFreq
+            );
+        }
+        if ((featureFlags & FEATURE.FRENCH_BANK_PRESENCE.id) != 0) {
+            distances.add(
+                (this.isFrenchBankPresent() == other.isFrenchBankPresent())
+                    ? 0.0f : 1.0f
+            );
+        }
+        if ((featureFlags & FEATURE.UK_ACRONYM_PRESENCE.id) != 0) {
+            distances.add(
+                (this.isUKAcronymPresent() == other.isUKAcronymPresent())
+                    ? 0.0f : 1.0f
+            );
+        }
+        if ((featureFlags & FEATURE.JAPANESE_COMPANY_PRESENCE.id) != 0) {
+            distances.add(
+                (this.isJapaneseCompanyPresent()
+                    == other.isJapaneseCompanyPresent())
+                        ? 0.0f : 1.0f
+            );
+        }
+        if ((featureFlags & FEATURE.USA_STATE_PRESENCE.id) != 0) {
+            distances.add(
+                (this.isUSAStatePresent() == other.isUSAStatePresent())
+                    ? 0.0f : 1.0f
+            );
+        }
+        if ((featureFlags & FEATURE.CAPITALS_PRESENCE.id) != 0) {
+            distances.add(
+                getHammingDistance(this.capitals, other.capitals) / 6.0f
+            );
+        }
+        if ((featureFlags & FEATURE.CURRENCIES_PRESENCE.id) != 0) {
+            distances.add(
+                getHammingDistance(this.currencies, other.currencies) / 6.0f
+            );
+        }
+        if ((featureFlags & FEATURE.FIRST_CAPITALIZED_WORD.id) != 0) {
+            distances.add(
+                1.0f - getGramsSimilarity(
+                    this.firstCapitalizedWordGrams,
+                    other.firstCapitalizedWordGrams,
+                    other.firstCapitalizedWord.length(),
+                    other.firstCapitalizedWord.length()
+                )
+            );
+        }
+        if ((featureFlags & FEATURE.FIRST_NUMBER.id) != 0) {
+            distances.add(
+                (this.getFirstNumber().equals(other.getFirstNumber()))
+                    ? 0.0f : 1.0f
+            );
+        }
+        if ((featureFlags & FEATURE.MOST_FREQUENT_ACRONYM.id) != 0) {
+            distances.add(
+                (this.getMostFrequentAcronym()
+                    .equals(other.getMostFrequentAcronym()))
+                        ? 0.0f : 1.0f
+            );
+        }
+        if ((featureFlags & FEATURE.TITLE.id) != 0) {
+            distances.add(
+                1.0f - getTitlesSimilarity(this.titleHashed, other.titleHashed)
+            );
+        }
 
         if (metric == METRIC.EUCLIDEAN) {
             float sum = 0.0f;
-            for (int i = 0; i < distances.length; ++i) {
-                sum += Math.pow(distances[i], 2);
+            for (float diff : distances) {
+                sum += Math.pow(diff, 2);
             }
 
             return (float)Math.sqrt(sum);
         } else if (metric == METRIC.TAXICAB) {
             float sum = 0.0f;
-            for (int i = 0; i < distances.length; ++i) {
-                sum += Math.abs(distances[i]);
+            for (float diff : distances) {
+                sum += Math.abs(diff);
             }
 
             return sum;
         } else {
-            float max_dist = distances[0];
-            for (int i = 1; i < distances.length; ++i) {
-                if (distances[i] > max_dist) {
-                    max_dist = distances[i];
+            float max_dist = distances.getFirst();
+            for (float diff: distances) {
+                if (diff > max_dist) {
+                    max_dist = diff;
                 }
             }
 
@@ -380,24 +506,28 @@ public class FeatureVector {
         FeatureVector vector;
         int westGermanPoliticianMaxCount;
         float canadianCityMaxFreq;
+        short featureFlags;
 
         public SimilarityComparator(
             FeatureVector vector,
             int westGermanPoliticianMaxCount,
-            float canadianCityMaxFreq
+            float canadianCityMaxFreq,
+            short featureFlags
         ) {
             this.vector = vector;
             this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
             this.canadianCityMaxFreq = canadianCityMaxFreq;
+            this.featureFlags = featureFlags;
         }
 
         @Override
         public int compare(FeatureVector v1, FeatureVector v2) {
             int np = this.westGermanPoliticianMaxCount;
             float cf = this.canadianCityMaxFreq;
+            short ff = this.featureFlags;
 
-            float s1 = this.vector.getSimilarity(v1, np, cf);
-            float s2 = this.vector.getSimilarity(v2, np, cf);
+            float s1 = this.vector.getSimilarity(v1, np, cf, ff);
+            float s2 = this.vector.getSimilarity(v2, np, cf, ff);
 
             if (s1 > s2) {
                 return -1;
@@ -415,17 +545,20 @@ public class FeatureVector {
         FeatureVector vector;
         int westGermanPoliticianMaxCount;
         float canadianCityMaxFreq;
+        short featureFlags;
         METRIC metric;
 
         public DistanceComparator(
             FeatureVector vector,
             int westGermanPoliticianMaxCount,
             float canadianCityMaxFreq,
+            short featureFlags,
             METRIC metric
         ) {
             this.vector = vector;
             this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
             this.canadianCityMaxFreq = canadianCityMaxFreq;
+            this.featureFlags = featureFlags;
             this.metric = metric;
         }
 
@@ -433,9 +566,10 @@ public class FeatureVector {
         public int compare(FeatureVector v1, FeatureVector v2) {
             int np = this.westGermanPoliticianMaxCount;
             float cf = this.canadianCityMaxFreq;
+            short ff = this.featureFlags;
 
-            float s1 = this.vector.getDistance(v1, np, cf, metric);
-            float s2 = this.vector.getDistance(v2, np, cf, metric);
+            float s1 = this.vector.getDistance(v1, np, cf, ff, metric);
+            float s2 = this.vector.getDistance(v2, np, cf, ff, metric);
 
             if (s1 < s2) {
                 return -1;
