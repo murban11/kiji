@@ -2,9 +2,11 @@ package com.example;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -13,6 +15,8 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
 
 public class Dataset {
+
+    private static final Random rnd = new Random(1337);
 
     public static Dataset loadFromSGMLFile(
         String filename
@@ -47,6 +51,10 @@ public class Dataset {
 
     public int getSize() {
         return articleList.size();
+    }
+
+    public void shuffleArticles() {
+        Collections.shuffle(articleList, rnd);
     }
 
     public Pair<Dataset, Dataset> split(float ratio) {

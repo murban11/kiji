@@ -36,6 +36,12 @@ public class Main
             .build();
         options.addOption(trainingRatio);
 
+        Option shuffle = Option.builder("s")
+            .longOpt("shuffle")
+            .desc("Shuffle the whole dataset before splitting into training and testing sets")
+            .build();
+        options.addOption(shuffle);
+
         Option metric = Option.builder("m")
             .longOpt("metric")
             .argName("metric")
@@ -202,6 +208,11 @@ public class Main
 
             Dataset dataset = Dataset.loadFromSGMLFile("dataset.sgm");
             System.out.println("Databset size: " + dataset.getSize());
+
+            if (cmd.hasOption("s")) {
+                dataset.shuffleArticles();
+            }
+
             Pair<Dataset, Dataset> splitted = dataset.split(ratio);
 
             Dataset training = splitted.first;
