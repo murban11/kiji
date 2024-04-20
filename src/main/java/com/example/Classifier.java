@@ -135,12 +135,12 @@ public class Classifier {
     public float getPrecision(Article.LABEL label) {
         int correctly_assigned = this.confusionMatrix.get(label).get(label);
 
-        int incorrectly_assigned = 0;
+        int assigned = 0;
         for (Article.LABEL l : Article.LABEL.values()) {
-            incorrectly_assigned += this.confusionMatrix.get(l).get(label);
+            assigned += this.confusionMatrix.get(l).get(label);
         }
 
-        return (float)correctly_assigned / (float)incorrectly_assigned;
+        return (float)correctly_assigned / (float)assigned;
     }
 
     public float getAccuracy() {
@@ -156,12 +156,12 @@ public class Classifier {
     public float getWeightedMeanOfSensitivity() {
         float mean = 0.0f;
         for (Article.LABEL l : Article.LABEL.values()) {
-            int assigned_count = 0;
+            int assigned = 0;
             for (Article.LABEL m : Article.LABEL.values()) {
-                assigned_count += this.confusionMatrix.get(l).get(m);
+                assigned += this.confusionMatrix.get(m).get(l);
             }
 
-            mean += (float)(getSensitivity(l) * assigned_count)
+            mean += (float)(getSensitivity(l) * assigned)
                 / (float)testingVectors.size();
         }
 
