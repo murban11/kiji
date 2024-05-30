@@ -1,5 +1,6 @@
 package com.example;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ public class Classifier {
     private float canadianCityMaxFreq;
 
     private short featureFlags;
+    private List<Article.LABEL> labels;
     private METRIC metric;
 
     private Map<Article.LABEL, Map<Article.LABEL, Integer>> confusionMatrix;
@@ -29,6 +31,7 @@ public class Classifier {
         List<FeatureVector> testingVectors,
         int westGermanPoliticianMaxCount,
         float canadianCityMaxFreq,
+        List<Article.LABEL> disabledLabels,
         short featureFlags,
         METRIC metric
     ) {
@@ -39,14 +42,19 @@ public class Classifier {
         this.testingVectors = testingVectors;
         this.westGermanPoliticianMaxCount = westGermanPoliticianMaxCount;
         this.canadianCityMaxFreq = canadianCityMaxFreq;
+        this.labels = new ArrayList<Article.LABEL>();
+        for (var l : Article.LABEL.values()) {
+            if (!disabledLabels.contains(l)) {
+                this.labels.add(l);
+            }
+        }
         this.featureFlags = featureFlags;
         this.metric = metric;
 
-        int labelCount = Article.LABEL.values().length;
-        this.confusionMatrix = new HashMap<>(labelCount);
-        for (Article.LABEL label : Article.LABEL.values()) {
-            this.confusionMatrix.put(label, new HashMap<>(labelCount));
-            for (Article.LABEL l : Article.LABEL.values()) {
+        this.confusionMatrix = new HashMap<>(this.labels.size());
+        for (Article.LABEL label : this.labels) {
+            this.confusionMatrix.put(label, new HashMap<>(this.labels.size()));
+            for (Article.LABEL l : this.labels) {
                 this.confusionMatrix.get(label).put(l, 0);
             }
         }
@@ -92,8 +100,8 @@ public class Classifier {
             );
 
             Map<Article.LABEL, Integer> labelCounts
-                = new HashMap<>(Article.LABEL.values().length);
-            for (Article.LABEL label : Article.LABEL.values()) {
+                = new HashMap<>(this.labels.size());
+            for (Article.LABEL label : this.labels) {
                 labelCounts.put(label, 0);
             }
 
@@ -125,7 +133,7 @@ public class Classifier {
         int correctly_assigned = this.confusionMatrix.get(label).get(label);
 
         int actually_belonging = 0;
-        for (Article.LABEL l : Article.LABEL.values()) {
+        for (Article.LABEL l : this.labels) {
             actually_belonging += this.confusionMatrix.get(label).get(l);
         }
 
@@ -136,7 +144,7 @@ public class Classifier {
         int correctly_assigned = this.confusionMatrix.get(label).get(label);
 
         int assigned = 0;
-        for (Article.LABEL l : Article.LABEL.values()) {
+        for (Article.LABEL l : this.labels) {
             assigned += this.confusionMatrix.get(l).get(label);
         }
 
@@ -146,7 +154,7 @@ public class Classifier {
     public float getAccuracy() {
         int correctly_classified = 0;
 
-        for (Article.LABEL l : Article.LABEL.values()) {
+        for (Article.LABEL l : this.labels) {
             correctly_classified += this.confusionMatrix.get(l).get(l);
         }
 
@@ -155,9 +163,9 @@ public class Classifier {
 
     public float getWeightedMeanOfSensitivity() {
         float mean = 0.0f;
-        for (Article.LABEL l : Article.LABEL.values()) {
+        for (Article.LABEL l : this.labels) {
             int assigned = 0;
-            for (Article.LABEL m : Article.LABEL.values()) {
+            for (Article.LABEL m : this.labels) {
                 assigned += this.confusionMatrix.get(m).get(l);
             }
 
@@ -170,9 +178,9 @@ public class Classifier {
 
     public float getWeightedMeanOfPrecision() {
         float mean = 0.0f;
-        for (Article.LABEL l : Article.LABEL.values()) {
+        for (Article.LABEL l : this.labels) {
             int assigned_count = 0;
-            for (Article.LABEL m : Article.LABEL.values()) {
+            for (Article.LABEL m : this.labels) {
                 assigned_count += this.confusionMatrix.get(l).get(m);
             }
 
@@ -192,9 +200,9 @@ public class Classifier {
 
     public float getWeightedMeanOfF1() {
         float mean = 0.0f;
-        for (Article.LABEL l : Article.LABEL.values()) {
+        for (Article.LABEL l : this.labels) {
             int assigned_count = 0;
-            for (Article.LABEL m : Article.LABEL.values()) {
+            for (Article.LABEL m : this.labels) {
                 assigned_count += this.confusionMatrix.get(l).get(m);
             }
 

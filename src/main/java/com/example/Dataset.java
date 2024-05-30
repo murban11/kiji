@@ -19,13 +19,14 @@ public class Dataset {
     private static final Random rnd = new Random(1337);
 
     public static Dataset loadFromSGMLFile(
-        String filename
+        String filename,
+        List<Article.LABEL> ignoredLabels
     ) throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setValidating(false);
 
         SAXParser parser = factory.newSAXParser();
-        DatasetHandler datasetHandler = new DatasetHandler();
+        DatasetHandler datasetHandler = new DatasetHandler(ignoredLabels);
 
         parser.parse(filename, datasetHandler);
         return datasetHandler.getDataset();

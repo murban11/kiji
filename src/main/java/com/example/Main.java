@@ -122,6 +122,20 @@ public class Main
                 .build();
         options.addOption(disableTitle);
 
+        Option ignoreWestGermanyLabel
+            = Option.builder("ignore_west_germany")
+                .longOpt("ignore-west-germany")
+                .build();
+        options.addOption(ignoreWestGermanyLabel);
+
+        Option ignoreUSALabel
+            = Option.builder("ignore_usa")
+                .longOpt("ignore-usa")
+                .build();
+        options.addOption(ignoreUSALabel);
+
+        // TODO
+
         CommandLine cmd;
         CommandLineParser parser = new PosixParser();
 
@@ -204,9 +218,29 @@ public class Main
                 System.out.println(f.toString());
             }
 
+            List<Article.LABEL> ignoredLabels = new ArrayList<>();
+            if (cmd.hasOption("ignore_west_germany")) {
+                ignoredLabels.add(Article.LABEL.WEST_GERMANY);
+            }
+            if (cmd.hasOption("ignore_usa")) {
+                ignoredLabels.add(Article.LABEL.USA);
+            }
+
+            System.out.println("labels:");
+            for (var l : Article.LABEL.values()) {
+                System.out.print("    ");
+                if (ignoredLabels.contains(l)) {
+                    System.out.print("-");
+                } else {
+                    System.out.print("+");
+                }
+                System.out.println(l.toString());
+            }
+
             System.out.println();
 
-            Dataset dataset = Dataset.loadFromSGMLFile("dataset.sgm");
+            Dataset dataset
+                = Dataset.loadFromSGMLFile("dataset.sgm", ignoredLabels);
             System.out.println("Databset size: " + dataset.getSize());
 
             if (cmd.hasOption("s")) {
@@ -299,14 +333,22 @@ public class Main
                 testingVectors,
                 westGermanPoliticianMaxCount,
                 canadianCityMaxFreq,
+                ignoredLabels,
                 featureFlag,
                 m
             );
             classifier.clasify();
 
+            List<Article.LABEL> labels = new ArrayList<>();
+            for (var l : Article.LABEL.values()) {
+                if (!ignoredLabels.contains(l)) {
+                    labels.add(l);
+                }
+            }
+
             System.out.println("\n\nAccuracy: " + classifier.getAccuracy());
             System.out.println();
-            for (Article.LABEL label : Article.LABEL.values()) {
+            for (Article.LABEL label : labels) {
                 System.out.println(
                     label.name()
                         + " sensitivity: "
@@ -316,7 +358,7 @@ public class Main
             System.out.println("Weighted mean of sensitivity: "
                 + classifier.getWeightedMeanOfSensitivity());
             System.out.println();
-            for (Article.LABEL label : Article.LABEL.values()) {
+            for (Article.LABEL label : labels) {
                 System.out.println(
                     label.name()
                         + " precision: "
@@ -326,7 +368,7 @@ public class Main
             System.out.println("Weighted mean of precistion: "
                 + classifier.getWeightedMeanOfPrecision());
             System.out.println();
-            for (Article.LABEL label : Article.LABEL.values()) {
+            for (Article.LABEL label : labels) {
                 System.out.println(
                     label.name()
                         + " F1: "

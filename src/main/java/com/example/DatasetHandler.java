@@ -18,10 +18,16 @@ public class DatasetHandler extends DefaultHandler {
     private StringBuilder elementValue;
     private boolean inPlaces;
     private boolean containsUnsupportedLabels;
+    private boolean containsIgnoredLabels;
 
     private String title;
     private List<Article.LABEL> labels;
+    private List<Article.LABEL> ignoredLabels;
     private String content;
+
+    public DatasetHandler(List<Article.LABEL> ignoredLabels) {
+        this.ignoredLabels = ignoredLabels;
+    }
 
     @Override
     public void characters(
@@ -54,6 +60,7 @@ public class DatasetHandler extends DefaultHandler {
                 this.labels = new ArrayList<>();
                 inPlaces = true;
                 containsUnsupportedLabels = false;
+                containsIgnoredLabels = false;
                 break;
             case D:
                 if (inPlaces) {
@@ -84,7 +91,10 @@ public class DatasetHandler extends DefaultHandler {
                     String labelStr = elementValue
                         .toString().toUpperCase().replaceAll("-", "_");
                     if (Article.isValidLabel(labelStr)) {
-                        labels.add(Article.LABEL.valueOf(labelStr));
+                        Article.LABEL label = Article.LABEL.valueOf(labelStr);
+                        if (!ignoredLabels.contains(label)) {
+                            labels.add(label);
+                        }
                     } else {
                         containsUnsupportedLabels = true;
                     }
