@@ -134,7 +134,29 @@ public class Main
                 .build();
         options.addOption(ignoreUSALabel);
 
-        // TODO
+        Option ignoreFranceLabel
+            = Option.builder("ignore_france")
+                .longOpt("ignore-france")
+                .build();
+        options.addOption(ignoreFranceLabel);
+
+        Option ignoreUKLabel
+            = Option.builder("ignore_uk")
+                .longOpt("ignore-uk")
+                .build();
+        options.addOption(ignoreUKLabel);
+
+        Option ignoreCanadaLabel
+            = Option.builder("ignore_canada")
+                .longOpt("ignore-canada")
+                .build();
+        options.addOption(ignoreCanadaLabel);
+
+        Option ignoreJapanLabel
+            = Option.builder("ignore_japan")
+                .longOpt("ignore-japan")
+                .build();
+        options.addOption(ignoreJapanLabel);
 
         CommandLine cmd;
         CommandLineParser parser = new PosixParser();
@@ -224,6 +246,18 @@ public class Main
             }
             if (cmd.hasOption("ignore_usa")) {
                 ignoredLabels.add(Article.LABEL.USA);
+            }
+            if (cmd.hasOption("ignore_france")) {
+                ignoredLabels.add(Article.LABEL.FRANCE);
+            }
+            if (cmd.hasOption("ignore_uk")) {
+                ignoredLabels.add(Article.LABEL.UK);
+            }
+            if (cmd.hasOption("ignore_canada")) {
+                ignoredLabels.add(Article.LABEL.CANADA);
+            }
+            if (cmd.hasOption("ignore_japan")) {
+                ignoredLabels.add(Article.LABEL.JAPAN);
             }
 
             System.out.println("labels:");
