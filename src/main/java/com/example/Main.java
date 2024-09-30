@@ -399,7 +399,7 @@ public class Main
                         + classifier.getPrecision(label)
                 );
             }
-            System.out.println("Weighted mean of precistion: "
+            System.out.println("Weighted mean of precision: "
                 + classifier.getWeightedMeanOfPrecision());
             System.out.println();
             for (Article.LABEL label : labels) {
