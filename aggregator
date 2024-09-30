@@ -1,0 +1,141 @@
+#!/bin/bash
+
+declare -r DATA_DIR='data'
+declare -r K_IMPACT_FILE_PATH="${DATA_DIR}/k_impact.csv"
+declare -r TRAINING_SET_SIZE_IMPACT_FILE_PATH="${DATA_DIR}/training_set_size_impact.csv"
+declare -r METRIC_IMPACT_FILE_PATH="${DATA_DIR}/metric_impact.csv"
+declare -r FEATURE_EXCLUSION_IMPACT_FILE_PATH_WITHOUT_EXT="${DATA_DIR}/feature_exclusion_impact"
+declare -r K_IMPACT_WITH_CHEBYSHEV_AND_DISABLED_FIRST_NUMBER_FILE_PATH="${DATA_DIR}/k_impact_with_chebyshev_and_disabled_first_number.csv"
+
+function extract_results {
+    echo "$1" | grep -i '\(accuracy\|sensitivity\|precision\|f1\)'
+}
+
+function extract_labels {
+    echo "$1" | sed 's/\([^:]\+\).*/\1/'
+}
+
+function extract_values {
+    echo "$1" | sed 's/[^:]\+:\ //'
+}
+
+function lines_to_comma_separated {
+    echo "$1" | paste -d, -s
+}
+
+function run_kiji {
+    java -jar target/kiji-1.0-SNAPSHOT-jar-with-dependencies.jar $1
+}
+
+function aggregate {
+    local params="$1"
+    local sequence="$2"
+    local iter_name="$3"
+    local file_path="$4"
+
+    local header_written=false
+
+    for i in $sequence; do
+        local kiji_output="$(run_kiji "$params $i")"
+        local results="$(extract_results "$kiji_output")"
+
+        if [[ "$header_written" == false ]]; then
+            local labels="$(extract_labels "$results")"
+            local header="$(lines_to_comma_separated "$labels")"
+            echo "$iter_name,$header" > "$file_path"
+            header_written=true
+        fi
+
+        local values="$(extract_values "$results")"
+        local body="$(lines_to_comma_separated "$values")"
+        echo "$i,$body" >> "$file_path"
+    done
+}
+
+function aggregate_k_impact_results {
+    aggregate \
+        "-r 0.5 -m euclidean -k" \
+        "$(eval echo "{1..5} {6..8..2} {10..20..10} {40..100..20}")" \
+        "k" \
+        "$K_IMPACT_FILE_PATH"
+}
+
+function aggregate_training_set_size_impact_results {
+    aggregate \
+        "-m euclidean -k 10 -r" \
+        "$(seq 0.1 0.1 0.9)" \
+        "training set size" \
+        "$TRAINING_SET_SIZE_IMPACT_FILE_PATH"
+}
+
+function aggregate_metric_impact_results {
+    aggregate \
+        "-r 0.5 -k 10 -m" \
+        "euclidean taxicab chebyshev" \
+        "metric" \
+        "$METRIC_IMPACT_FILE_PATH"
+}
+
+function aggregate_feature_exclusion_impact_results {
+    sequence="$(echo \
+        "--disable-west-german-political-count"\
+        "--disable-canadian-city-freq"\
+        "--disable-french-bank-presence"\
+        "--disable-uk-acronym-presence"\
+        "--disable-japanese-company-presence"\
+        "--disable-usa-state-presence"\
+        "--disable-capitals-presence"\
+        "--disable-currencies-presence"\
+        "--disable-first-capitalized-word"\
+        "--disable-first-number"\
+        "--disable-most-frequent-acronym"\
+        "--disable-title"\
+    )"
+
+    for metric in "euclidean" "taxicab" "chebyshev"; do
+        aggregate \
+            "-r 0.5 -k 10 -m $metric" \
+            "$sequence" \
+            "feature" \
+            "${FEATURE_EXCLUSION_IMPACT_FILE_PATH_WITHOUT_EXT}_${metric}.csv"
+    done
+}
+
+function aggregate_k_impact_with_chebyshev_and_disabled_first_number_results {
+    aggregate \
+        "-r 0.9 -m chebyshev --disable-first-number -k" \
+        "$(eval echo "{1..5} {6..8..2} {10..20..10} {40..60..20}")" \
+        "k" \
+        "$K_IMPACT_WITH_CHEBYSHEV_AND_DISABLED_FIRST_NUMBER_FILE_PATH"
+}
+
+mkdir -p "$DATA_DIR"
+
+if [[ ! -f "$K_IMPACT_FILE_PATH" ]]; then
+    echo "Aggregating k impact results..."
+    aggregate_k_impact_results
+fi
+
+if [[ ! -f "$TRAINING_SET_SIZE_IMPACT_FILE_PATH" ]]; then
+    echo "Aggregating training set size impact results..."
+    aggregate_training_set_size_impact_results
+fi
+
+if [[ ! -f "$METRIC_IMPACT_FILE_PATH" ]]; then
+    echo "Aggregating metric impact results..."
+    aggregate_metric_impact_results
+fi
+
+if [[
+    ! -f "${FEATURE_EXCLUSION_IMPACT_FILE_PATH_WITHOUT_EXT}_euclidean.csv"
+    || ! -f "${FEATURE_EXCLUSION_IMPACT_FILE_PATH_WITHOUT_EXT}_taxicab.csv"
+    || ! -f "${FEATURE_EXCLUSION_IMPACT_FILE_PATH_WITHOUT_EXT}_chebyshev.csv"
+]]; then
+    echo "Aggregating feature exclusion impact results..."
+    aggregate_feature_exclusion_impact_results
+fi
+
+if [[ ! -f "$K_IMPACT_WITH_CHEBYSHEV_AND_DISABLED_FIRST_NUMBER_FILE_PATH" ]]; then
+    echo "Aggregating k impact with chebyshev and disabled first number results..."
+    aggregate_k_impact_with_chebyshev_and_disabled_first_number_results
+fi
