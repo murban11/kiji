@@ -2,8 +2,12 @@
 
 declare -r DATA_DIR='data'
 declare -r K_IMPACT_FILE_PATH="${DATA_DIR}/k_impact.csv"
+declare -r K_IMPACT_IGNORING_USA_FILE_PATH="${DATA_DIR}/k_impact_ignoring_usa.csv"
 declare -r TRAINING_SET_SIZE_IMPACT_FILE_PATH="${DATA_DIR}/training_set_size_impact.csv"
 declare -r METRIC_IMPACT_FILE_PATH="${DATA_DIR}/metric_impact.csv"
+declare -r METRIC_IMPACT_IGNORING_WEST_GERMANY_JAPAN_AND_UK_FILE_PATH="${DATA_DIR}/metric_impact_ignoring_west_germany_japan_and_uk.csv"
+declare -r METRIC_IMPACT_IGNORING_CAPITALIZED_WORD_ACRONYM_AND_TITLE_FILE_PATH="${DATA_DIR}/metric_impact_ignoring_capitalized_word_acronym_and_title.csv"
+declare -r METRIC_IMPACT_IGNORING_ALL_EXCEPT_CAPITALIZED_WORD_ACRONYM_AND_TITLE_FILE_PATH="${DATA_DIR}/metric_impact_ignoring_all_except_capitalized_word_acronym_and_title.csv"
 declare -r FEATURE_EXCLUSION_IMPACT_FILE_PATH_WITHOUT_EXT="${DATA_DIR}/feature_exclusion_impact"
 declare -r K_IMPACT_WITH_CHEBYSHEV_AND_DISABLED_FIRST_NUMBER_FILE_PATH="${DATA_DIR}/k_impact_with_chebyshev_and_disabled_first_number.csv"
 
@@ -60,6 +64,14 @@ function aggregate_k_impact_results {
         "$K_IMPACT_FILE_PATH"
 }
 
+function aggregate_k_impact_ignoring_usa_results {
+    aggregate \
+        "-r 0.5 -m euclidean --ignore-usa -k" \
+        "$(eval echo "{1..5} {6..8..2} {10..20..10} {40..100..20}")" \
+        "k" \
+        "$K_IMPACT_IGNORING_USA_FILE_PATH"
+}
+
 function aggregate_training_set_size_impact_results {
     aggregate \
         "-m euclidean -k 10 -r" \
@@ -76,8 +88,32 @@ function aggregate_metric_impact_results {
         "$METRIC_IMPACT_FILE_PATH"
 }
 
+function aggregate_metric_impact_ignoring_west_germany_japan_and_uk_results {
+    aggregate \
+        "-r 0.5 -k 10 --ignore-west-germany --ignore-japan --ignore-uk -m" \
+        "euclidean taxicab chebyshev" \
+        "metric" \
+        "$METRIC_IMPACT_IGNORING_WEST_GERMANY_JAPAN_AND_UK_FILE_PATH"
+}
+
+function aggregate_metric_impact_ignoring_capitalized_word_acronym_and_title {
+    aggregate \
+        "-r 0.5 -k 10 --disable-first-capitalized-word --disable-most-frequent-acronym --disable-title -m" \
+        "euclidean taxicab chebyshev" \
+        "metric" \
+        "$METRIC_IMPACT_IGNORING_CAPITALIZED_WORD_ACRONYM_AND_TITLE_FILE_PATH"
+}
+
+function aggregate_metric_impact_ignoring_all_except_capitalized_word_acronym_and_title {
+    aggregate \
+        "-r 0.5 -k 10 --disable-west-german-political-count --disable-canadian-city-freq --disable-french-bank-presence --disable-uk-acronym-presence --disable-japanese-company-presence --disable-usa-state-presence --disable-capitals-presence --disable-currencies-presence --disable-first-number -m" \
+        "euclidean taxicab chebyshev" \
+        "metric" \
+        "$METRIC_IMPACT_IGNORING_ALL_EXCEPT_CAPITALIZED_WORD_ACRONYM_AND_TITLE_FILE_PATH"
+}
+
 function aggregate_feature_exclusion_impact_results {
-    sequence="$(echo \
+    local sequence="$(echo \
         "--disable-west-german-political-count"\
         "--disable-canadian-city-freq"\
         "--disable-french-bank-presence"\
@@ -116,6 +152,11 @@ if [[ ! -f "$K_IMPACT_FILE_PATH" ]]; then
     aggregate_k_impact_results
 fi
 
+if [[ ! -f "$K_IMPACT_IGNORING_USA_FILE_PATH" ]]; then
+    echo "Aggregating k impact ignoring usa results..."
+    aggregate_k_impact_ignoring_usa_results
+fi
+
 if [[ ! -f "$TRAINING_SET_SIZE_IMPACT_FILE_PATH" ]]; then
     echo "Aggregating training set size impact results..."
     aggregate_training_set_size_impact_results
@@ -124,6 +165,21 @@ fi
 if [[ ! -f "$METRIC_IMPACT_FILE_PATH" ]]; then
     echo "Aggregating metric impact results..."
     aggregate_metric_impact_results
+fi
+
+if [[ ! -f "$METRIC_IMPACT_IGNORING_WEST_GERMANY_JAPAN_AND_UK_FILE_PATH" ]]; then
+    echo "Aggregating metric impact ignoring west germany, japan, and uk results..."
+    aggregate_metric_impact_ignoring_west_germany_japan_and_uk_results
+fi
+
+if [[ ! -f "$METRIC_IMPACT_IGNORING_CAPITALIZED_WORD_ACRONYM_AND_TITLE_FILE_PATH" ]]; then
+    echo "Aggregating metric impact ignoring capitalized word, acronym and title results..."
+    aggregate_metric_impact_ignoring_capitalized_word_acronym_and_title
+fi
+
+if [[ ! -f "$METRIC_IMPACT_IGNORING_ALL_EXCEPT_CAPITALIZED_WORD_ACRONYM_AND_TITLE_FILE_PATH" ]]; then
+    echo "Aggregating metric impact ignoring all except capitalized word, acronym and title results..."
+    aggregate_metric_impact_ignoring_all_except_capitalized_word_acronym_and_title
 fi
 
 if [[
