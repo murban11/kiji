@@ -778,5 +778,9 @@ The best classification quality among the the parameters we tested was obtained 
 * Weighted mean of precision: 0.950
 * Weighted mean of $F_1$: 0.941
 
+## LICENSE
+
+[MIT](https://github.com/murban11/kiji/blob/main/LICENSE)
+
 [^1]: Lewis, David. (1997). Reuters-21578 Text Categorization Collection. UCI Machine Learning Repository. <https://doi.org/10.24432/C52G6M>.
 [^2]: Porter, M.F. "Snowball: A Language for Stemming Algorithms." <https://snowballstem.org/>
